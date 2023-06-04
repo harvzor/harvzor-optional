@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional", "Harvzor.Optional\Harvzor.Optional.csproj", "{9ED9BB37-3250-4DF0-8224-FE86BAA2859A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.NewtonsoftJson", "Harvzor.Optional.NewtonsoftJson\Harvzor.Optional.NewtonsoftJson.csproj", "{10E4E8D9-A35F-4A33-A88A-FBC7B6B5D24A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson", "Harvzor.Optional.SystemTextJson\Harvzor.Optional.SystemTextJson.csproj", "{2CBE9D90-F193-4019-AB88-44C4C51D175C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9ED9BB37-3250-4DF0-8224-FE86BAA2859A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9ED9BB37-3250-4DF0-8224-FE86BAA2859A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9ED9BB37-3250-4DF0-8224-FE86BAA2859A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9ED9BB37-3250-4DF0-8224-FE86BAA2859A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10E4E8D9-A35F-4A33-A88A-FBC7B6B5D24A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10E4E8D9-A35F-4A33-A88A-FBC7B6B5D24A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10E4E8D9-A35F-4A33-A88A-FBC7B6B5D24A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10E4E8D9-A35F-4A33-A88A-FBC7B6B5D24A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CBE9D90-F193-4019-AB88-44C4C51D175C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CBE9D90-F193-4019-AB88-44C4C51D175C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CBE9D90-F193-4019-AB88-44C4C51D175C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CBE9D90-F193-4019-AB88-44C4C51D175C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
