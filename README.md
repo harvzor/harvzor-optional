@@ -22,7 +22,7 @@ In the above example, you could make the string nullable (with `string?`), but n
 And then you might actually want to explicitly allow null values, but then run into the same issue where you're not sure if the original JSON had
 the value as `null`, or if it was just undefined.
 
-## Optional<T>
+## Optional&lt;T&gt;
 
 ### Basic example
 
