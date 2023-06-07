@@ -1,10 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional", "Harvzor.Optional\Harvzor.Optional.csproj", "{9ED9BB37-3250-4DF0-8224-FE86BAA2859A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional", "src\Harvzor.Optional\Harvzor.Optional.csproj", "{9ED9BB37-3250-4DF0-8224-FE86BAA2859A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.NewtonsoftJson", "Harvzor.Optional.NewtonsoftJson\Harvzor.Optional.NewtonsoftJson.csproj", "{10E4E8D9-A35F-4A33-A88A-FBC7B6B5D24A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.NewtonsoftJson", "src\Harvzor.Optional.NewtonsoftJson\Harvzor.Optional.NewtonsoftJson.csproj", "{10E4E8D9-A35F-4A33-A88A-FBC7B6B5D24A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson", "Harvzor.Optional.SystemTextJson\Harvzor.Optional.SystemTextJson.csproj", "{2CBE9D90-F193-4019-AB88-44C4C51D175C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson", "src\Harvzor.Optional.SystemTextJson\Harvzor.Optional.SystemTextJson.csproj", "{2CBE9D90-F193-4019-AB88-44C4C51D175C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0DC0E672-7784-4D81-8A18-C415472AC595}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,10 @@ Global
 		{2CBE9D90-F193-4019-AB88-44C4C51D175C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CBE9D90-F193-4019-AB88-44C4C51D175C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CBE9D90-F193-4019-AB88-44C4C51D175C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9ED9BB37-3250-4DF0-8224-FE86BAA2859A} = {0DC0E672-7784-4D81-8A18-C415472AC595}
+		{10E4E8D9-A35F-4A33-A88A-FBC7B6B5D24A} = {0DC0E672-7784-4D81-8A18-C415472AC595}
+		{2CBE9D90-F193-4019-AB88-44C4C51D175C} = {0DC0E672-7784-4D81-8A18-C415472AC595}
 	EndGlobalSection
 EndGlobal
