@@ -44,7 +44,9 @@ if (foo.DefinedProperty.IsDefined)
     Console.WriteLine(foo.DefinedProperty.Value); // "Bar" 
     
 if (foo.UndefinedProperty.IsDefined)
-    Console.WriteLine(foo.UndefinedProperty.Value); // Will print the default value.
+    Console.WriteLine(foo.UndefinedProperty.Value); // Won't print as the value wasn't explicitly instantiated.
+
+Console.WriteLine(foo.UndefinedProperty.Value); // Will print the default value.
 
 public class Foo
 {
@@ -58,13 +60,16 @@ public class Foo
 This example uses System.Text.Json, but it's pretty similar to Newtonsoft:
 
 ```csharp
+using System.Text.Json;
+using Harvzor.Optional;
+
 JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions();
 jsonSerializerOptions.Converters.Add(new Harvzor.Optional.SystemTextJson.OptionalJsonConverter());
 
 // The JSON would normally come from some external data source:
 string json = "{\"DefinedProperty\":\"Bar\"}";
 
-Foo foo = JsonSerializer.Deserialize<Foo>(json, jsonSerializerOptions);
+Foo foo = JsonSerializer.Deserialize<Foo>(json, jsonSerializerOptions)!;
 
 Console.WriteLine(foo.DefinedProperty.IsDefined); // True
 Console.WriteLine(foo.UndefinedProperty.IsDefined); // False
@@ -98,7 +103,7 @@ services
     });
 ```
 
-#### Swagger
+#### Swagger support
 
 If you're using Swashbuckle Swagger, you'll also need to tell it how your types should look:
 
