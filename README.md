@@ -1,10 +1,10 @@
 ﻿# Harvzor.Optional
 
 | NuGet Package                   | Version                                                                                                                                     |
-|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+|:--------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------|
 | Harvzor.Optional                | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional)](https://www.nuget.org/packages/Harvzor.Optional/)                               |
 | Harvzor.Optional.SystemTextJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.SystemTextJson)](https://www.nuget.org/packages/Harvzor.Optional.SystemTextJson/) |
-| NewtonsoftJson                  | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.NewtonsoftJson)](https://www.nuget.org/packages/Harvzor.Optional.NewtonsoftJson/) |
+| Harvzor.Optional.NewtonsoftJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.NewtonsoftJson)](https://www.nuget.org/packages/Harvzor.Optional.NewtonsoftJson/) |
 
 ## The problem
 
@@ -138,8 +138,8 @@ You can see what basic types are available here: https://swagger.io/docs/specifi
 
 ### Manual release
 
-1. Get an API key from https://www.nuget.org/account/apikeys.
-2. 
+1. Get an API key from https://www.nuget.org/account/apikeys
+2.
 ```
 dotnet pack -c Release
 ```
