@@ -24,6 +24,8 @@ the value as `null`, or if it was just undefined.
 
 ## Optional&lt;T&gt;
 
+[![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional)](https://www.nuget.org/packages/Harvzor.Optional/)
+
 ### Basic example
 
 You can use `Optional<T>` to know if a property or variable has been explicitly instantiated:
@@ -90,6 +92,8 @@ public class Foo
 
 ## Harvzor.Optional.SystemTextJson
 
+[![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.SystemTextJson)](https://www.nuget.org/packages/Harvzor.Optional.SystemTextJson/)
+
 ### Use in an API
 
 To use it in your controller models, simply register in your startup:
@@ -123,6 +127,12 @@ services.AddSwaggerGen(options =>
 ```
 
 You can see what basic types are available here: https://swagger.io/docs/specification/data-models/data-types/
+
+## Harvzor.Optional.NewtonsoftJson
+
+[![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.NewtonsoftJson)](https://www.nuget.org/packages/Harvzor.Optional.NewtonsoftJson/)
+
+... docs to come ...
 
 ## Releasing
 
