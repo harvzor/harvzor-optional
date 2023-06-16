@@ -123,3 +123,19 @@ services.AddSwaggerGen(options =>
 ```
 
 You can see what basic types are available here: https://swagger.io/docs/specification/data-models/data-types/
+
+## Releasing
+
+### Manual release
+
+1. Get an API key from https://www.nuget.org/account/apikeys.
+2. 
+```
+dotnet pack -c Release
+```
+3.
+```
+dotnet nuget push .\src\Harvzor.Optional\bin\Release\ -k {key} -s https://api.nuget.org/v3/index.json
+dotnet nuget push .\src\Harvzor.Optional.NewtonsoftJson\bin\Release\ -k {key}} -s https://api.nuget.org/v3/index.json
+dotnet nuget push .\src\Harvzor.Optional.SystemTextJson\bin\Release\ -k {key}} -s https://api.nuget.org/v3/index.json
+```

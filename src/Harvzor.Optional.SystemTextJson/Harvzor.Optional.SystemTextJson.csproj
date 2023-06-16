@@ -2,6 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <PackageId>Harvzor.Optional.SystemTextJson</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>@harvzor</Authors>
+    <PackageProjectUrl>https://github.com/harvzor/harvzor-optional</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/harvzor/harvzor-optional</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile>bin\Debug\Harvzor.Optional.SystemTextJson.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\Harvzor.Optional.SystemTextJson.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
