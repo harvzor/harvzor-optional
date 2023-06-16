@@ -1,5 +1,11 @@
 ﻿# Harvzor.Optional
 
+| NuGet Package                   | Version                                                                                                                                     |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| Harvzor.Optional                | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional)](https://www.nuget.org/packages/Harvzor.Optional/)                               |
+| Harvzor.Optional.SystemTextJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.SystemTextJson)](https://www.nuget.org/packages/Harvzor.Optional.SystemTextJson/) |
+| NewtonsoftJson                  | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.NewtonsoftJson)](https://www.nuget.org/packages/Harvzor.Optional.NewtonsoftJson/) |
+
 ## The problem
 
 ```csharp
@@ -22,9 +28,7 @@ In the above example, you could make the string nullable (with `string?`), but n
 And then you might actually want to explicitly allow null values, but then run into the same issue where you're not sure if the original JSON had
 the value as `null`, or if it was just undefined.
 
-## Optional&lt;T&gt;
-
-[![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional)](https://www.nuget.org/packages/Harvzor.Optional/)
+## The solution: Optional&lt;T&gt;
 
 ### Basic example
 
@@ -92,8 +96,6 @@ public class Foo
 
 ## Harvzor.Optional.SystemTextJson
 
-[![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.SystemTextJson)](https://www.nuget.org/packages/Harvzor.Optional.SystemTextJson/)
-
 ### Use in an API
 
 To use it in your controller models, simply register in your startup:
@@ -129,8 +131,6 @@ services.AddSwaggerGen(options =>
 You can see what basic types are available here: https://swagger.io/docs/specification/data-models/data-types/
 
 ## Harvzor.Optional.NewtonsoftJson
-
-[![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.NewtonsoftJson)](https://www.nuget.org/packages/Harvzor.Optional.NewtonsoftJson/)
 
 ... docs to come ...
 
