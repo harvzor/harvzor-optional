@@ -141,6 +141,6 @@ You can see what basic types are available here: https://swagger.io/docs/specifi
 1. Get an API key from https://www.nuget.org/account/apikeys
 2.
 ```
-docker-compose build push-nuget --build-arg version="{version}"
+docker-compose build --build-arg version="{version}" push-nuget
 docker-compose run --rm push-nuget --api-key {key}
 ```
