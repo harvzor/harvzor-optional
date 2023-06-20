@@ -4,7 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <PackageId>Harvzor.Optional.NewtonsoftJson</PackageId>
-    <Version>0.0.1</Version>
     <Authors>@harvzor</Authors>
     <PackageProjectUrl>https://github.com/harvzor/harvzor-optional</PackageProjectUrl>
     <RepositoryUrl>https://github.com/harvzor/harvzor-optional</RepositoryUrl>
