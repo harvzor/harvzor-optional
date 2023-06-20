@@ -136,7 +136,13 @@ You can see what basic types are available here: https://swagger.io/docs/specifi
 
 ## Releasing
 
+### GitLab CI
+
+1. Create a new release with a semver release name
+
 ### Manual release
+
+In case the CI doesn't work:
 
 1. Get an API key from https://www.nuget.org/account/apikeys
 2.
