@@ -13,5 +13,5 @@ jobs:
         uses: actions/checkout@v3
       - name: Build docker image
         run: docker-compose build --build-arg version="$GITHUB_REF_NAME" push-nuget
-      - name: Run tests
+      - name: Push the package
         run: docker-compose run --rm push-nuget --api-key $NUGET_API_KEY
