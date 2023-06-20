@@ -1,0 +1,19 @@
+name: 'Push NuGet'
+description: 'Push the dotnet package to NuGet'
+on:
+  release:
+    types: [published]
+jobs:
+  push-nuget:
+    name: Push nuget package
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    container:
+      image: docker.io/my_username/my_image:my_tag
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build docker image
+        run: docker-compose build push-nuget --build-arg version="$GITHUB_REF"
+      - name: Run tests
+        run: docker-compose run --rm push-nuget --api-key $NUGET_API_KEY

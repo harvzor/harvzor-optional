@@ -1,0 +1,7 @@
+version: "3.4"
+
+services:
+  push-nuget:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.push-nuget
