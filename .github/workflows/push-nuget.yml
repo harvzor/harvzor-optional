@@ -8,8 +8,6 @@ jobs:
     env:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     runs-on: ubuntu-latest
-    container:
-      image: docker.io/my_username/my_image:my_tag
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
