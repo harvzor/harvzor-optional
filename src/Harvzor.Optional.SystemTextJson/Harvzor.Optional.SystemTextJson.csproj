@@ -8,6 +8,8 @@
     <PackageProjectUrl>https://github.com/harvzor/harvzor-optional</PackageProjectUrl>
     <RepositoryUrl>https://github.com/harvzor/harvzor-optional</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -24,6 +26,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Harvzor.Optional\Harvzor.Optional.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
