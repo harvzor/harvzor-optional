@@ -1,5 +1,4 @@
 name: 'Push NuGet'
-description: 'Push the dotnet package to NuGet'
 on:
   release:
     types: [published]
@@ -8,6 +7,7 @@ jobs:
     name: Push nuget package
     env:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    runs-on: ubuntu-latest
     container:
       image: docker.io/my_username/my_image:my_tag
     steps:
