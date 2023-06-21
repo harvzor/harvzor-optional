@@ -8,6 +8,10 @@ COPY . .
 RUN dotnet restore
 RUN dotnet build /p:Version=$version -c Release --no-restore
 
+FROM build AS test
+
+ENTRYPOINT ["dotnet", "test", "-c", "Release", "--no-restore", "--no-build"]
+
 FROM build AS push-nuget
 
 ARG version 

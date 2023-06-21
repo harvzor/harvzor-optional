@@ -3,8 +3,14 @@ on:
   release:
     types: [published]
 jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+  test:
+    uses: ./.github/workflows/test.yml
+    needs: build
   push-nuget:
     name: Push nuget package
+    needs: test
     env:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     runs-on: ubuntu-latest

@@ -11,3 +11,8 @@ services:
       context: .
       dockerfile: ./Dockerfile
       target: build
+  test:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: test
