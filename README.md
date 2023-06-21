@@ -1,4 +1,6 @@
-﻿# Harvzor.Optional
+﻿[![Build](https://github.com/harvzor/harvzor-optional/actions/workflows/build.yml/badge.svg)](https://github.com/harvzor/harvzor-optional/actions/workflows/build.yml)
+
+# Harvzor.Optional
 
 | NuGet Package                   | Version                                                                                                                                     |
 |:--------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------|
