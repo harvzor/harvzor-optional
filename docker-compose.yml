@@ -4,4 +4,10 @@ services:
   push-nuget:
     build:
       context: .
-      dockerfile: ./Dockerfile.push-nuget
+      dockerfile: ./Dockerfile
+      target: push-nuget
+  build:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: build

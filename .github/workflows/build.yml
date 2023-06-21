@@ -1,0 +1,11 @@
+name: 'Push NuGet'
+on: push
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build docker image
+        run: docker-compose build --build-arg version="$GITHUB_REF_NAME" build
