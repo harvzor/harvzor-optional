@@ -1,12 +1,22 @@
 ﻿using System;
 using System.Reflection;
 using Newtonsoft.Json;
-using Harvzor.Optional;
 using Newtonsoft.Json.Serialization;
 using System.Linq;
 
+// Missing XML comment for publicly visible type or member
+#pragma warning disable CS1591
+
 namespace Harvzor.Optional.NewtonsoftJson;
 
+/// <summary>
+/// Register this customer Newtonsoft converter to get JSON support of <see cref="Optional{T}"/>. Docs: https://www.newtonsoft.com/json/help/html/CustomJsonConverter.htm
+/// </summary>
+/// <remarks>
+/// Dev note: It's generally better to use `JsonConverter&lt;T&gt;` because that only has to convert a specific property.
+/// However, there was an issue with that so I had to use the more basic `JsonConverter` which accesses all properties
+/// on the JSON object.
+/// </remarks>
 public class OptionalJsonConverter : JsonConverter
 {
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
