@@ -26,9 +26,11 @@ public class Foo
 }
 ```
 
-In the above example, you could make the string nullable (with `string?`), but now you're explicitly saying that null is value you want to accept.
-And then you might actually want to explicitly allow null values, but then run into the same issue where you're not sure if the original JSON had
-the value as `null`, or if it was just undefined.
+### So just use a nullable value? (`string?`)
+
+In the above example, you could make the string nullable (with `string?`), but now you're explicitly saying that null is value you want to accept (which you'll have to handle in your code).
+
+What if you want to allow a client to explicitly set null (`"{ "myProperty": null }"`), and want to handle this in your code, while also knowing if the client didn't send *anything*?
 
 ## The solution: Optional&lt;T&gt;
 
@@ -48,10 +50,10 @@ Console.WriteLine(foo.DefinedProperty.IsDefined); // True
 Console.WriteLine(foo.UndefinedProperty.IsDefined); // False
 
 // Now I can check if a value was explicitly instantiated:
-if (foo.DefinedProperty.IsDefined)
+if (foo.DefinedProperty.IsDefined) // True
     Console.WriteLine(foo.DefinedProperty.Value); // "Bar" 
     
-if (foo.UndefinedProperty.IsDefined)
+if (foo.UndefinedProperty.IsDefined) // False
     Console.WriteLine(foo.UndefinedProperty.Value); // Won't print as the value wasn't explicitly instantiated.
 
 Console.WriteLine(foo.UndefinedProperty.Value); // Will print the default value.
@@ -65,7 +67,7 @@ public class Foo
 
 ### Use it with JSON
 
-This example uses System.Text.Json, but it's pretty similar to Newtonsoft:
+This example uses `System.Text.Json`:
 
 ```csharp
 using System.Text.Json;
@@ -83,10 +85,10 @@ Console.WriteLine(foo.DefinedProperty.IsDefined); // True
 Console.WriteLine(foo.UndefinedProperty.IsDefined); // False
 
 // Now I can check if a value was defined before I try using it:
-if (foo.DefinedProperty.IsDefined)
+if (foo.DefinedProperty.IsDefined) // True
     Console.WriteLine(foo.DefinedProperty.Value); // "Bar" 
     
-if (foo.UndefinedProperty.IsDefined)
+if (foo.UndefinedProperty.IsDefined) // False
     Console.WriteLine(foo.UndefinedProperty.Value); // Won't print as the value wasn't defined.
 
 public class Foo
@@ -140,6 +142,10 @@ services.AddSwaggerGen(options =>
 ```
 
 You can see what basic types are available here: https://swagger.io/docs/specification/data-models/data-types/
+
+## Use case: JSON Merge PATCH
+
+... need docs ...
 
 ## Releasing
 
