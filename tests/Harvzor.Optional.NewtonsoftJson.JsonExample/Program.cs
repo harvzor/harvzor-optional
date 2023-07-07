@@ -1,13 +1,14 @@
-﻿using System.Text.Json;
-using Harvzor.Optional;
+﻿using Harvzor.Optional;
+using Harvzor.Optional.NewtonsoftJson;
+using Newtonsoft.Json;
 
-JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions();
-jsonSerializerOptions.Converters.Add(new Harvzor.Optional.SystemTextJson.OptionalJsonConverter());
+JsonSerializer serializer = new JsonSerializer();
+serializer.Converters.Add(new OptionalJsonConverter());
 
 // The JSON would normally come from some external data source:
 string json = "{\"DefinedProperty\":\"Bar\"}";
 
-Foo foo = JsonSerializer.Deserialize<Foo>(json, jsonSerializerOptions)!;
+Foo foo = JsonConvert.DeserializeObject<Foo>(json, new OptionalJsonConverter());
 
 Console.WriteLine(foo.DefinedProperty.IsDefined); // True
 Console.WriteLine(foo.UndefinedProperty.IsDefined); // False

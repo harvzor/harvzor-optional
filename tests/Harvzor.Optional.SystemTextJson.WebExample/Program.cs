@@ -1,17 +1,19 @@
 using Harvzor.Optional;
-using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.MapType<Optional<string>>(() => new OpenApiSchema
+builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen(options =>
     {
-        Type = "string"
+        options.MapType<Optional<string>>(() => new OpenApiSchema
+        {
+            Type = "string"
+        });
     });
-});
 
 builder.Services.Configure<JsonOptions>(o => o.SerializerOptions.Converters.Add(new Harvzor.Optional.SystemTextJson.OptionalJsonConverter()));
 
@@ -31,8 +33,8 @@ app
     {
         if (foo.OptionalString.IsDefined)
             return $"You're value is \"{foo.OptionalString.Value ?? "null"}\".";
-        else
-            return "You sent nothing.";
+        
+        return "You sent nothing.";
     });
 
 app.Run();
