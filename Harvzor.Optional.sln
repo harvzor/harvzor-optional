@@ -8,17 +8,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemText
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0DC0E672-7784-4D81-8A18-C415472AC595}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{014F5435-D1FE-4CDE-B116-97F5C0E840FD}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{014F5435-D1FE-4CDE-B116-97F5C0E840FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson.WebExample", "tests\Harvzor.Optional.SystemTextJson.WebExample\Harvzor.Optional.SystemTextJson.WebExample.csproj", "{3D32BE33-BB08-4383-9E63-C00709B311F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson.WebExample", "examples\Harvzor.Optional.SystemTextJson.WebExample\Harvzor.Optional.SystemTextJson.WebExample.csproj", "{3D32BE33-BB08-4383-9E63-C00709B311F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson.JsonExample", "tests\Harvzor.Optional.SystemTextJson.JsonExample\Harvzor.Optional.SystemTextJson.JsonExample.csproj", "{F092042B-25D5-499E-AFF4-9DECFF4F32EC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson.JsonExample", "examples\Harvzor.Optional.SystemTextJson.JsonExample\Harvzor.Optional.SystemTextJson.JsonExample.csproj", "{F092042B-25D5-499E-AFF4-9DECFF4F32EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.BasicExample", "tests\Harvzor.Optional.BasicExample\Harvzor.Optional.BasicExample.csproj", "{ED575BCA-72D6-47D2-9D67-6DBB01F3A8A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.BasicExample", "examples\Harvzor.Optional.BasicExample\Harvzor.Optional.BasicExample.csproj", "{ED575BCA-72D6-47D2-9D67-6DBB01F3A8A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.NewtonsoftJson.JsonExample", "tests\Harvzor.Optional.NewtonsoftJson.JsonExample\Harvzor.Optional.NewtonsoftJson.JsonExample.csproj", "{AF118196-A2FB-4F4F-B45D-E38A5B1DC632}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.NewtonsoftJson.JsonExample", "examples\Harvzor.Optional.NewtonsoftJson.JsonExample\Harvzor.Optional.NewtonsoftJson.JsonExample.csproj", "{AF118196-A2FB-4F4F-B45D-E38A5B1DC632}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.NewtonsoftJson.WebExample", "tests\Harvzor.Optional.NewtonsoftJson.WebExample\Harvzor.Optional.NewtonsoftJson.WebExample.csproj", "{0DF9E8A3-F9D6-43FD-AC68-5383B23B5631}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.NewtonsoftJson.WebExample", "examples\Harvzor.Optional.NewtonsoftJson.WebExample\Harvzor.Optional.NewtonsoftJson.WebExample.csproj", "{0DF9E8A3-F9D6-43FD-AC68-5383B23B5631}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
