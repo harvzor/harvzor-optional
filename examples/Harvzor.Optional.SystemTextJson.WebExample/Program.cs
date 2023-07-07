@@ -1,5 +1,4 @@
 using Harvzor.Optional;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
