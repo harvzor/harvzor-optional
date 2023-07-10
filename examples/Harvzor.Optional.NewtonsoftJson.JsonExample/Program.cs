@@ -2,9 +2,6 @@
 using Harvzor.Optional.NewtonsoftJson;
 using Newtonsoft.Json;
 
-JsonSerializer serializer = new JsonSerializer();
-serializer.Converters.Add(new OptionalJsonConverter());
-
 // The JSON would normally come from some external data source:
 string json = "{\"DefinedProperty\":\"Bar\"}";
 
