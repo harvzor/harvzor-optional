@@ -1,7 +1,10 @@
 name: 'Push NuGet'
+
 on:
+  
   release:
     types: [published]
+
 jobs:
   build:
     uses: ./.github/workflows/build.yml

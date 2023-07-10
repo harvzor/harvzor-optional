@@ -1,14 +1,8 @@
 name: 'Build'
+
 on: push
+
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Build docker image
-        run: docker-compose build build
-
-
-# https://docs.github.com/en/actions/using-workflows/reusing-workflows
+    uses: ./.github/workflows/reusable-build.yml
