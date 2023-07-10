@@ -10,7 +10,7 @@ RUN dotnet build /p:Version=$version -c Release --no-restore
 
 FROM build AS test
 
-ENTRYPOINT ["dotnet", "test", "-c", "Release", "--no-restore", "--no-build"]
+ENTRYPOINT ["dotnet", "test", "-c", "Release", "--no-restore", "--no-build", "/p:CollectCoverage=true", "/p:CoverletOutputFormat=opencover"]
 
 FROM build AS push-nuget
 
