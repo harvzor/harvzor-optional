@@ -7,9 +7,9 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/reusable-build.yml
   test:
-    uses: ./.github/workflows/test.yml
+    uses: ./.github/workflows/reusable-test.yml
     needs: build
   push-nuget:
     name: Push nuget package
