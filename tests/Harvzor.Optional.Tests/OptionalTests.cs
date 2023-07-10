@@ -31,10 +31,7 @@ public class OptionalTests
     {
         // Arrange
 
-        Optional<string> optionalString = new()
-        {
-            Value = "some value"
-        };
+        Optional<string> optionalString = new(value: "some value");
 
         // Assert
 
@@ -58,10 +55,7 @@ public class OptionalTests
     {
         // Arrange
 
-        Optional<string> optionalString = new()
-        {
-            Value = "some value"
-        };
+        Optional<string> optionalString = new(value: "some value");
 
         // Assert
 
@@ -85,10 +79,7 @@ public class OptionalTests
     {
         // Arrange
 
-        Optional<string> optionalString = new()
-        {
-            Value = "some value"
-        };
+        Optional<string> optionalString = new(value: "some value");
         
         // Assert
 

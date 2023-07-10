@@ -9,6 +9,11 @@ public struct Optional<T> : IOptional
 {
     private object _value;
 
+    public Optional(T value) : this()
+    {
+        Value = value;
+    }
+
     /// <summary>
     /// Tells you if the underlying value has been defined.
     /// </summary>
@@ -91,7 +96,7 @@ public struct Optional<T> : IOptional
     /// </example>
     public static implicit operator Optional<T>(T value)
     {
-        return new Optional<T> { Value = value };
+        return new Optional<T>(value: value);
     }
 
     /// <summary>
