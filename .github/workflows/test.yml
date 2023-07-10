@@ -3,9 +3,17 @@ on: push
 jobs:
 #  build:
 #    uses: ./.github/workflows/build.yml
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build docker image
+        run: docker-compose build build
   test:
     name: Test
-#    needs: build
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
