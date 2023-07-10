@@ -14,4 +14,29 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     {
         return JsonConvert.SerializeObject(obj, new OptionalJsonConverter())!;
     }
+    
+    [Fact]
+    public void WriteJson_ShouldIgnoreProperty_WhenPropertyIsIgnored()
+    {
+        // Arrange
+
+        FooWithIgnoredProperty foo = new()
+        {
+            OptionalProperty = "some value"
+        };
+
+        // Act
+
+        string json = Serialize(foo);
+
+        // Assert
+
+        json.ShouldBe("{}");
+    }
+    
+    private class FooWithIgnoredProperty
+    {
+        [JsonIgnore]
+        public Optional<string> OptionalProperty { get; set; }
+    }
 }
