@@ -34,8 +34,7 @@ public class OptionalJsonConverter : JsonConverterFactory
         return converter;
     }
 
-    private class OptionalConverterInner<TValue> :
-        JsonConverter<Optional<TValue>>
+    private class OptionalConverterInner<TValue> : JsonConverter<Optional<TValue>>
     {
         private readonly JsonConverter<TValue> _valueConverter;
         private readonly Type _valueType;
@@ -66,7 +65,9 @@ public class OptionalJsonConverter : JsonConverterFactory
             Optional<TValue> optional,
             JsonSerializerOptions options)
         {
-            _valueConverter.Write(writer, optional.Value, options);
+            // todo: this just skips the prop
+            if (optional.IsDefined)
+                _valueConverter.Write(writer, optional.Value, options);
         }
     }
 }
