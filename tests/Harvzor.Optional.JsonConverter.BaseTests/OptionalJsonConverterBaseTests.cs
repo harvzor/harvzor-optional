@@ -324,6 +324,124 @@ public abstract class OptionalJsonConverterBaseTests
     
     #endregion Field In Object
 
+    #region Property In Nested Object
+
+    [Fact]
+    public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInNestedObjectIsDefined()
+    {
+        // Arrange
+
+        NestedClass nestedClass = new NestedClass
+        {
+            ClassWithOptionalProperty = new()
+            {
+                OptionalProperty = "some value"
+            }
+        };
+
+        // Act
+
+        string json = Serialize(nestedClass);
+
+        // Assert
+
+        json.ShouldBe("{\"ClassWithOptionalProperty\":{\"OptionalProperty\":\"some value\"}}");
+    }
+    
+    [Fact]
+    public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInNestedObjectIsUndefined()
+    {
+        // Arrange
+
+        NestedClass nestedClass = new NestedClass
+        {
+            ClassWithOptionalProperty = new()
+        };
+
+        // Act
+
+        string json = Serialize(nestedClass);
+
+        // Assert
+
+        json.ShouldBe("{\"ClassWithOptionalProperty\":{}}");
+    }
+    
+    [Fact]
+    public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInNestedObjectIsNull()
+    {
+        // Arrange
+
+        NestedClass nestedClass = new NestedClass
+        {
+            ClassWithOptionalProperty = new()
+            {
+                OptionalProperty = null
+            }
+        };
+
+        // Act
+
+        string json = Serialize(nestedClass);
+
+        // Assert
+
+        json.ShouldBe("{\"ClassWithOptionalProperty\":{\"OptionalProperty\":null}}");
+    }
+    
+    [Fact]
+    public void ReadJson_ShouldBeUndefined_WhenOptionalPropertyInNestedObjectAndNoValue()
+    {
+        // Arrange
+        
+        string json = "{\"ClassWithOptionalProperty\":{}}";
+        
+        // Act
+        
+        NestedClass nestedClass = Deserialize<NestedClass>(json);
+        
+        // Assert
+
+        nestedClass.ClassWithOptionalProperty.OptionalProperty.IsDefined.ShouldBe(false);
+        nestedClass.ClassWithOptionalProperty.OptionalProperty.Value.ShouldBe(default);
+    }
+
+    [Fact]
+    public void ReadJson_ShouldReadCorrectly_WhenOptionalPropertyInNestedObject()
+    {
+        // Arrange
+
+        string json = "{\"ClassWithOptionalProperty\":{\"OptionalProperty\":\"some value\"}}";
+
+        // Act
+
+        NestedClass nestedClass = Deserialize<NestedClass>(json);
+
+        // Assert
+
+        nestedClass.ClassWithOptionalProperty.OptionalProperty.IsDefined.ShouldBe(true);
+        nestedClass.ClassWithOptionalProperty.OptionalProperty.Value.ShouldBe("some value");
+    }
+    
+    [Fact]
+    public void ReadJson_ShouldReadCorrectly_WhenOptionalPropertyInNestedObjectHasNullValue()
+    {
+        // Arrange
+
+        string json = "{\"ClassWithOptionalProperty\":{\"OptionalProperty\":null}}";
+
+        // Act
+
+        NestedClass nestedClass = Deserialize<NestedClass>(json);
+
+        // Assert
+
+        nestedClass.ClassWithOptionalProperty.OptionalProperty.IsDefined.ShouldBe(true);
+        nestedClass.ClassWithOptionalProperty.OptionalProperty.Value.ShouldBe(null);
+    }
+
+    #endregion Property In Nested Object
+
     private class ClassWithOptionalProperty
     {
         public Optional<string> OptionalProperty { get; set; }
