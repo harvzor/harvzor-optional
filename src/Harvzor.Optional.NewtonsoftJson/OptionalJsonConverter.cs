@@ -29,7 +29,7 @@ public class OptionalJsonConverter : JsonConverter
         // TODO: maybe allow this to serialize full objects and defer to default serializers when possible, then I can control the proper name?
         return IsOptional(objectType)
            // TODO: Need to traverse whole tree?
-           || (objectType.IsClass && objectType.GetProperties().Any(x => IsOptional(x.PropertyType)));
+           || (objectType.IsClass && objectType.GetPropertiesAndFields().Any(member => IsOptional(member.GetMemberType())));
     }
 
     public override bool CanRead => IsOptional(_objectType);
@@ -37,21 +37,6 @@ public class OptionalJsonConverter : JsonConverter
     private bool IsOptional(Type objectType)
     {
         return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Optional<>);
-    }
-
-    /// <remarks>
-    /// https://stackoverflow.com/a/12680454/
-    /// </remarks>
-    private MemberInfo[] GetPropertiesAndFields(Type objectType)
-    {
-        const BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.Instance;
-
-        IEnumerable<MemberInfo> fields = objectType.GetFields(bindingFlags);
-        PropertyInfo[] properties = objectType.GetProperties(bindingFlags);
-        
-        return fields
-            .Concat(properties)
-            .ToArray();
     }
 
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
@@ -79,24 +64,24 @@ public class OptionalJsonConverter : JsonConverter
         writer.WriteStartObject();
         
         // TODO: Need to traverse whole tree?
-        foreach (PropertyInfo property in value.GetType().GetProperties())
+        foreach (IMember member in value.GetType().GetPropertiesAndFields())
         {
-            if (IsOptional(property.PropertyType))
+            if (IsOptional(member.GetMemberType()))
             {
-                if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute)))
+                if (Attribute.IsDefined(member.GetMemberInfo(), typeof(JsonIgnoreAttribute)))
                     continue;
 
-                object optionalValue = property.GetValue(value, null);
-                
+                object optionalValue = member.GetValue(value);
+
                 if (((IOptional)optionalValue).IsDefined)
                 {
-                    writer.WritePropertyName(property.Name);
+                    writer.WritePropertyName(member.Name);
                     serializer.Serialize(writer, optionalValue);
                 }
             }
             else
             {
-                serializer.Serialize(writer, property);
+                serializer.Serialize(writer, member);
             }
         }
         
