@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 // Missing XML comment for publicly visible type or member
 #pragma warning disable CS1591
@@ -91,7 +88,9 @@ public class OptionalJsonConverter : JsonConverter
             }
             else
             {
-                serializer.Serialize(writer, member);
+                writer.WritePropertyName(member.Name);
+                object val = member.GetValue(value);
+                serializer.Serialize(writer, val);
             }
         }
         

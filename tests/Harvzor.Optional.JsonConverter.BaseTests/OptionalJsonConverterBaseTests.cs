@@ -464,8 +464,6 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     #endregion Property In Nested Object
-    
-    // TODO: ensure that Optional works with other custom serializers
 
     private class ClassWithOptionalProperty
     {
