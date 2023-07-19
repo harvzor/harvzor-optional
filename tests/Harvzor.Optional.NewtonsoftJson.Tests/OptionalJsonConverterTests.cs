@@ -16,6 +16,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Custom Attribute")]
     public void WriteJson_ShouldIgnoreProperty_WhenPropertyIsIgnored()
     {
         // Arrange
@@ -41,6 +42,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Custom Attribute")]
     public void WriteJson_ShouldCorrectlyNameProperty_WhenPropertyHasNameOverwritten()
     {
         // Arrange

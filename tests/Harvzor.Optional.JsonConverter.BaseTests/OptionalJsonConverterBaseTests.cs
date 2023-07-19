@@ -9,6 +9,7 @@ public abstract class OptionalJsonConverterBaseTests
     #region Single Property
     
     [Fact]
+    [Trait("Category","SingleProperty")]
     public void WriteJson_ShouldWriteValue_WhenSinglePropertyIsDefined()
     {
         // Arrange
@@ -29,6 +30,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","SingleProperty")]
     public void WriteJson_ShouldWriteNothing_WhenSinglePropertyIsUndefined()
     {
         // Arrange
@@ -46,6 +48,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","SingleProperty")]
     public void WriteJson_ShouldWriteNull_WhenSinglePropertyInObjectIsNull()
     {
         // Arrange
@@ -66,6 +69,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","SingleProperty")]
     public void ReadJson_ShouldReadValue_WhenSinglePropertyIsDefined()
     {
         // Arrange
@@ -85,6 +89,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     [Fact(Skip = "In order for this to work, I have to deserialize to `Optional<string>?`, otherwise it seems to throw an exception out of my control?")]
+    [Trait("Category","SingleProperty")]
     public void ReadJson_ShouldBeUndefined_WhenSinglePropertyIsUndefined()
     {
         // Arrange
@@ -109,6 +114,7 @@ public abstract class OptionalJsonConverterBaseTests
     #region Property In Object
     
     [Fact]
+    [Trait("Category","Property In Object")]
     public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInObjectIsDefined()
     {
         // Arrange
@@ -128,6 +134,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Property In Object")]
     public void WriteJson_ShouldWriteNothing_WhenOptionalPropertyInObjectIsUndefined()
     {
         // Arrange
@@ -144,6 +151,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Property In Object")]
     public void WriteJson_ShouldWriteNull_WhenOptionalPropertyInObjectIsNull()
     {
         // Arrange
@@ -163,6 +171,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     [Fact]
+    [Trait("Category","Property In Object")]
     public void ReadJson_ShouldBeUndefined_WhenOptionalPropertyInObjectAndNoValue()
     {
         // Arrange
@@ -180,6 +189,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     [Fact]
+    [Trait("Category","Property In Object")]
     public void ReadJson_ShouldReadCorrectly_WhenOptionalPropertyInObject()
     {
         // Arrange
@@ -197,6 +207,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Property In Object")]
     public void ReadJson_ShouldReadCorrectly_WhenOptionalPropertyInObjectHasNullValue()
     {
         // Arrange
@@ -218,6 +229,7 @@ public abstract class OptionalJsonConverterBaseTests
     #region Field In Object
     
     [Fact]
+    [Trait("Category","Field In Object")]
     public void WriteJson_ShouldWriteValue_WhenOptionalFieldInObjectIsDefined()
     {
         // Arrange
@@ -237,6 +249,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Field In Object")]
     public void WriteJson_ShouldWriteNothing_WhenOptionalFieldInObjectIsUndefined()
     {
         // Arrange
@@ -253,6 +266,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Field In Object")]
     public void WriteJson_ShouldWriteNull_WhenOptionalFieldInObjectIsNull()
     {
         // Arrange
@@ -272,6 +286,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     [Fact]
+    [Trait("Category","Field In Object")]
     public void ReadJson_ShouldBeUndefined_WhenOptionalFieldInObjectAndNoValue()
     {
         // Arrange
@@ -289,6 +304,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     [Fact]
+    [Trait("Category","Field In Object")]
     public void ReadJson_ShouldReadCorrectly_WhenOptionalFieldInObject()
     {
         // Arrange
@@ -306,6 +322,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Field In Object")]
     public void ReadJson_ShouldReadCorrectly_WhenOptionalFieldInObjectHasNullValue()
     {
         // Arrange
@@ -327,6 +344,7 @@ public abstract class OptionalJsonConverterBaseTests
     #region Property In Nested Object
 
     [Fact]
+    [Trait("Category","Property In Nested Object")]
     public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInNestedObjectIsDefined()
     {
         // Arrange
@@ -349,6 +367,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Property In Nested Object")]
     public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInNestedObjectIsUndefined()
     {
         // Arrange
@@ -368,6 +387,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Property In Nested Object")]
     public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInNestedObjectIsNull()
     {
         // Arrange
@@ -390,6 +410,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Property In Nested Object")]
     public void ReadJson_ShouldBeUndefined_WhenOptionalPropertyInNestedObjectAndNoValue()
     {
         // Arrange
@@ -407,6 +428,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     [Fact]
+    [Trait("Category","Property In Nested Object")]
     public void ReadJson_ShouldReadCorrectly_WhenOptionalPropertyInNestedObject()
     {
         // Arrange
@@ -424,6 +446,7 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     [Fact]
+    [Trait("Category","Property In Nested Object")]
     public void ReadJson_ShouldReadCorrectly_WhenOptionalPropertyInNestedObjectHasNullValue()
     {
         // Arrange
@@ -441,6 +464,8 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     #endregion Property In Nested Object
+    
+    // TODO: ensure that Optional works with other custom serializers
 
     private class ClassWithOptionalProperty
     {
