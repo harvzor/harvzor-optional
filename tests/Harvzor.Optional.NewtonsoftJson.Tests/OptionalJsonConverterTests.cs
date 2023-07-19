@@ -20,23 +20,48 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     {
         // Arrange
 
-        FooWithIgnoredProperty foo = new()
+        ClassWithIgnoredProperty classWithIgnoredProperty = new()
         {
             OptionalProperty = "some value"
         };
 
         // Act
 
-        string json = Serialize(foo);
+        string json = Serialize(classWithIgnoredProperty);
 
         // Assert
 
         json.ShouldBe("{}");
     }
     
-    private class FooWithIgnoredProperty
+    private class ClassWithIgnoredProperty
     {
         [JsonIgnore]
+        public Optional<string> OptionalProperty { get; set; }
+    }
+    
+    [Fact]
+    public void WriteJson_ShouldCorrectlyNameProperty_WhenPropertyHasNameOverwritten()
+    {
+        // Arrange
+
+        ClassWithPropertyWithOverwrittenName classWithPropertyWithOverwrittenName = new()
+        {
+            OptionalProperty = "some value"
+        };
+
+        // Act
+
+        string json = Serialize(classWithPropertyWithOverwrittenName);
+
+        // Assert
+
+        json.ShouldBe("{\"OptProperty\":\"some value\"}");
+    }
+    
+    private class ClassWithPropertyWithOverwrittenName
+    {
+        [JsonProperty("OptProperty")]
         public Optional<string> OptionalProperty { get; set; }
     }
 }

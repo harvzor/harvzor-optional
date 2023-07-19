@@ -25,10 +25,7 @@ public class OptionalJsonConverter : JsonConverter
     {
         _objectType = objectType;
         
-        // TODO: this serializer doesn't effect the property name (at least when it's just a single property and not on an object, unsure on that)
-        // TODO: maybe allow this to serialize full objects and defer to default serializers when possible, then I can control the proper name?
         return IsOptional(objectType)
-           // TODO: Need to traverse whole tree?
            || (objectType.IsClass && objectType.GetPropertiesAndFields().Any(member => IsOptional(member.GetMemberType())));
     }
 
@@ -63,7 +60,6 @@ public class OptionalJsonConverter : JsonConverter
     {
         writer.WriteStartObject();
         
-        // TODO: Need to traverse whole tree?
         foreach (IMember member in value.GetType().GetPropertiesAndFields())
         {
             if (IsOptional(member.GetMemberType()))
@@ -75,7 +71,21 @@ public class OptionalJsonConverter : JsonConverter
 
                 if (((IOptional)optionalValue).IsDefined)
                 {
-                    writer.WritePropertyName(member.Name);
+                    if (Attribute.IsDefined(member.GetMemberInfo(), typeof(JsonPropertyAttribute)))
+                    {
+                        JsonPropertyAttribute attribute = Attribute.GetCustomAttribute(
+                            member.GetMemberInfo(),
+                            typeof(JsonPropertyAttribute)
+                        )! as JsonPropertyAttribute;
+                        
+                        writer.WritePropertyName(attribute!.PropertyName);
+                    }
+                    else
+                    {
+                        writer.WritePropertyName(member.Name);
+                    }
+                        
+                    
                     serializer.Serialize(writer, optionalValue);
                 }
             }
