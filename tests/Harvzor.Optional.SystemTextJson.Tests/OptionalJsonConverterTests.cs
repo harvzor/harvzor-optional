@@ -8,6 +8,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
+        IncludeFields = true,
         Converters =
         {
             new OptionalJsonConverter()
