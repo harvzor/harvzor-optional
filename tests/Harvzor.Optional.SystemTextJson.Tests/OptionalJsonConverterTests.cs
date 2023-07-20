@@ -9,6 +9,8 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
         IncludeFields = true,
+        // todo: ensure that indenting changes the output
+        WriteIndented = true,
         Converters =
         {
             new OptionalJsonConverter()

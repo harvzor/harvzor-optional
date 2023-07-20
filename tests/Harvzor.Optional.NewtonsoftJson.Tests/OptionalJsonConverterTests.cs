@@ -7,7 +7,15 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
 {
     protected override T Deserialize<T>(string str)
     {
-        return JsonConvert.DeserializeObject<T>(str, new OptionalJsonConverter())!;
+        return JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings()
+        {
+            // TODO: setting to indented doesn't change the output as the output has been overwritten...
+            Formatting = Formatting.Indented,
+            Converters = new List<Newtonsoft.Json.JsonConverter>
+            {
+                new OptionalJsonConverter(),
+            },
+        })!;
     }
 
     protected override string Serialize(object obj)
