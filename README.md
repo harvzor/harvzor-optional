@@ -163,3 +163,8 @@ In case the CI doesn't work:
 docker-compose build --build-arg version="{version}" push-nuget
 docker-compose run --rm push-nuget --api-key {key}
 ```
+
+## Further reading
+
+- https://stackoverflow.com/questions/63418549/custom-json-serializer-for-optional-property-with-system-text-json
+- https://stackoverflow.com/questions/12522000/optionally-serialize-a-property-based-on-its-runtime-value
