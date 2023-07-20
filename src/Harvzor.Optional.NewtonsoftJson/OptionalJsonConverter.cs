@@ -16,17 +16,10 @@ namespace Harvzor.Optional.NewtonsoftJson;
 /// </remarks>
 public class OptionalJsonConverter : JsonConverter
 {
-    private Type _objectType;
-    
     public override bool CanConvert(Type objectType)
     {
-        _objectType = objectType;
-        
-        return IsOptional(objectType)
-           || (objectType.IsClass && objectType.GetPropertiesAndFields().Any(member => IsOptional(member.GetMemberType())));
+        return IsOptional(objectType);
     }
-
-    public override bool CanRead => IsOptional(_objectType);
 
     private bool IsOptional(Type objectType)
     {
@@ -45,63 +38,9 @@ public class OptionalJsonConverter : JsonConverter
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
-        if (value.GetType().IsClass)
-            WritePropertyNameJson(writer, value, serializer);
-        else if (IsOptional(value.GetType()))
-            WritePropertyValueJson(writer, value, serializer);
-        else
-            throw new Exception("Unexpected value.");
-    }
-
-    private void WritePropertyNameJson(JsonWriter writer, object value, JsonSerializer serializer)
-    {
-        writer.WriteStartObject();
-        
-        foreach (IMember member in value.GetType().GetPropertiesAndFields())
-        {
-            if (IsOptional(member.GetMemberType()))
-            {
-                if (Attribute.IsDefined(member.GetMemberInfo(), typeof(JsonIgnoreAttribute)))
-                    continue;
-
-                object optionalValue = member.GetValue(value);
-
-                if (((IOptional)optionalValue).IsDefined)
-                {
-                    if (Attribute.IsDefined(member.GetMemberInfo(), typeof(JsonPropertyAttribute)))
-                    {
-                        JsonPropertyAttribute attribute = Attribute.GetCustomAttribute(
-                            member.GetMemberInfo(),
-                            typeof(JsonPropertyAttribute)
-                        )! as JsonPropertyAttribute;
-                        
-                        writer.WritePropertyName(attribute!.PropertyName);
-                    }
-                    else
-                    {
-                        writer.WritePropertyName(member.Name);
-                    }
-                        
-                    
-                    serializer.Serialize(writer, optionalValue);
-                }
-            }
-            else
-            {
-                writer.WritePropertyName(member.Name);
-                object val = member.GetValue(value);
-                serializer.Serialize(writer, val);
-            }
-        }
-        
-        writer.WriteEndObject();
-    }
-    
-    private void WritePropertyValueJson(JsonWriter writer, object value, JsonSerializer serializer)
-    {
         var optionalType = value.GetType();
-        var valueProperty = optionalType.GetProperty(nameof(IOptional.Value))!;
-        var isDefinedProperty = optionalType.GetProperty(nameof(IOptional.IsDefined))!;
+        var valueProperty = optionalType.GetProperty("Value")!;
+        var isDefinedProperty = optionalType.GetProperty("IsDefined")!;
 
         var isDefined = (bool)isDefinedProperty.GetValue(value);
         var underlyingValue = valueProperty.GetValue(value);
