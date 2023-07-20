@@ -62,16 +62,27 @@ static class AssemblyExtension
     /// <remarks>
     /// https://stackoverflow.com/questions/12680341/how-to-get-both-fields-and-properties-in-single-call-via-reflection/1268045
     /// </remarks>
-    public static IMember[] GetPropertiesAndFields(this Type t)
+    public static IEnumerable<IMember> GetPropertiesAndFields(this Type t)
     {
-        List<IMember> retList = new List<IMember>();
+        foreach (PropertyInfo propertyInfo in t.GetProperties())
+            yield return new PropertyMember(propertyInfo);
 
-        foreach(PropertyInfo pi in t.GetProperties())
-            retList.Add(new PropertyMember(pi));
+        foreach (FieldInfo fieldInfo in t.GetFields())
+            yield return new FieldMember(fieldInfo);
+    }
 
-        foreach(FieldInfo fi in t.GetFields())
-            retList.Add(new FieldMember(fi));
+    public static IMember? GetPropertyOrField(this Type t, string propertyOrFieldName)
+    {
+        PropertyInfo? property = t.GetProperty(propertyOrFieldName);
 
-        return retList.ToArray();
+        if (property != null)
+            return new PropertyMember(property);
+        
+        FieldInfo field = t.GetField(propertyOrFieldName);
+
+        if (field != null)
+            return new FieldMember(field);
+
+        return null;
     }
 }
