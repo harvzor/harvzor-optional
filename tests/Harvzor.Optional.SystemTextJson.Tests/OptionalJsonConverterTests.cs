@@ -75,4 +75,33 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
         [JsonPropertyName("OptProperty")]
         public Optional<string> OptionalProperty { get; set; }
     }
+    
+    [Fact]
+    [Trait("Category","Works With Other Custom Converter")]
+    public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInObjectIsDefinedAndThereIsAnotherConverter()
+    {
+        // Arrange
+
+        ClassWithOptionalPropertyAndVersionConverter classWithOptionalPropertyAndVersionConverter = new ClassWithOptionalPropertyAndVersionConverter
+        {
+            OptionalProperty = "some value",
+            VersionProperty = new Version(1, 2, 3),
+        };
+
+        // Act
+
+        string json = Serialize(classWithOptionalPropertyAndVersionConverter);
+
+        // Assert
+
+        json.ShouldBe("{\"OptionalProperty\":\"some value\",\"VersionProperty\":\"1.2.3\"}");
+    }
+    
+    private class ClassWithOptionalPropertyAndVersionConverter
+    {
+        public Optional<string> OptionalProperty { get; set; }
+        
+        [JsonConverter(typeof(VersionConverter))]
+        public Version VersionProperty { get; set; }
+    }
 }
