@@ -10,7 +10,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     {
         IncludeFields = true,
         // todo: ensure that indenting changes the output
-        WriteIndented = true,
+        // WriteIndented = true,
         Converters =
         {
             new OptionalJsonConverter()
