@@ -20,7 +20,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
 
     protected override string Serialize(object obj)
     {
-        return JsonConvert.SerializeObject(obj, new JsonSerializerSettings
+        return JsonConvert.SerializeObject(obj, new JsonSerializerSettings()
         {
             // TODO: setting to indented doesn't change the output as the output has been overwritten...
             // Formatting = Formatting.Indented,
