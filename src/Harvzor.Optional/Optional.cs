@@ -14,46 +14,10 @@ public struct Optional<T> : IOptional
         Value = value;
     }
 
-    /// <summary>
-    /// Tells you if the underlying value has been defined.
-    /// </summary>
-    /// <example>
-    /// var optionalString = new Optional&lt;string&gt;();
-    /// <br/>
-    /// // Will print "False":
-    /// <br/>
-    /// Console.WriteLine(optionalString.IsDefined);
-    /// <br/>
-    /// optionalString = "actual value";
-    /// <br/>
-    /// // Will print "True":
-    /// <br/>
-    /// Console.WriteLine(optionalString.IsDefined);
-    /// </example>
-    /// <remarks>
-    /// It's sort of like in JS when you want to check if a value is defined with `myStr === undefined`.
-    /// </remarks>
+    /// <inheritdoc cref="IOptional.IsDefined"/>
     public bool IsDefined { get; private set; }
 
-    /// <summary>
-    /// Allows you to access the actual underlying value.
-    /// </summary>
-    /// <example>
-    /// var optionalString = new Optional&lt;string&gt;();
-    /// <br/>
-    /// // Prints the default value:
-    /// <br/>
-    /// Console.WriteLine(optionalString.Value);
-    /// <br/>
-    /// optionalString = "actual value";
-    /// <br/>
-    /// // Prints "actual value":
-    /// <br/>
-    /// Console.WriteLine(optionalString.Value);
-    /// </example>
-    /// <returns>
-    /// Will return the default value of the underlying type if no value has been set.
-    /// </returns>
+    /// <inheritdoc cref="IOptional.Value"/>
     public T Value
     {
         get => IsDefined ? (T)_value : default;
@@ -65,9 +29,7 @@ public struct Optional<T> : IOptional
         }
     }
 
-    /// <summary>
-    /// Allows you to get the underlying type (<see cref="T"/>).
-    /// </summary>
+    /// <inheritdoc cref="IOptional.GenericType"/>
     public Type GenericType => typeof(T);
 
     object IOptional.Value
