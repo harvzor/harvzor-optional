@@ -464,6 +464,8 @@ public abstract class OptionalJsonConverterBaseTests
     }
 
     #endregion Property In Nested Object
+    
+    // todo: ensure that collections of Optionals work as expected
 
     private class ClassWithOptionalProperty
     {
