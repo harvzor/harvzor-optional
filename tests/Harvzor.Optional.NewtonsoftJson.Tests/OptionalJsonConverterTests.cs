@@ -22,6 +22,8 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     {
         return JsonConvert.SerializeObject(obj, new JsonSerializerSettings
         {
+            // TODO: setting to indented doesn't change the output as the output has been overwritten...
+            // Formatting = Formatting.Indented,
             Converters = new List<Newtonsoft.Json.JsonConverter>
             {
                 new OptionalJsonConverter()
