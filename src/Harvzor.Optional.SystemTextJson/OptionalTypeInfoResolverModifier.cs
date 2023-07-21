@@ -37,26 +37,23 @@ public static class OptionalTypeInfoResolverModifiers
     /// </example>
     public static void IgnoreUndefinedOptionals(JsonTypeInfo typeInfo)
     {
-        // todo: this is the same as OptionalJsonConverter.CanConvert
-        bool CanConvert(Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Optional<>);
+        bool CanConvert(Type type) => typeof(IOptional).IsAssignableFrom(type);
 
-        void Run(JsonPropertyInfo propertyInfo)
+        void AddShouldSerialize(JsonPropertyInfo propertyInfo)
         {
-            if (CanConvert(propertyInfo.PropertyType))
-            {
-                propertyInfo.ShouldSerialize = static (_, value) =>
-                    ((IOptional)value!).IsDefined;
-            }
+            propertyInfo.ShouldSerialize = static (_, value) =>
+                ((IOptional)value!).IsDefined;
         }
 
         if (CanConvert(typeInfo.Type))
-            Run(typeInfo.CreateJsonPropertyInfo(typeof(IOptional), "asd"));
+            AddShouldSerialize(typeInfo.CreateJsonPropertyInfo(typeof(IOptional), "asd"));
         else
         {
             // When `IncludeFields = true` is set, it seems that System.Text.Json treats properties as fields,
             // so no need to write anything fancy for fields here.
             foreach (JsonPropertyInfo propertyInfo in typeInfo.Properties)
-                Run(propertyInfo);
+                if (CanConvert(propertyInfo.PropertyType))
+                    AddShouldSerialize(propertyInfo);
         }
     }
 }
