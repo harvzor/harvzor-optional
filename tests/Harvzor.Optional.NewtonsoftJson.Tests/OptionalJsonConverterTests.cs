@@ -26,7 +26,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
             // Formatting = Formatting.Indented,
             Converters = new List<Newtonsoft.Json.JsonConverter>
             {
-                new OptionalJsonConverter()
+                new OptionalJsonConverter(),
             },
             ContractResolver = new OptionalShouldSerializeContractResolver(),
         })!;
