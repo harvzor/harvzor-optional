@@ -18,6 +18,10 @@ public class OptionalJsonConverter : JsonConverterFactory
         return typeof(IOptional).IsAssignableFrom(typeToConvert);
     }
 
+    /// <summary>
+    /// Create a converter generically so it can handle the different types of underlying values of <see cref="Optional{T}"/>
+    /// without needing to register a different converter for each different underlying type.
+    /// </summary>
     public override JsonConverter CreateConverter(
         Type type,
         JsonSerializerOptions options)
@@ -65,9 +69,13 @@ public class OptionalJsonConverter : JsonConverterFactory
             Optional<TValue> optional,
             JsonSerializerOptions options)
         {
-            // todo: this just skips the prop
+            // For some reason this line only is it and returns false when it's a single property being serialized, not
+            // when it's a property on an object (assuming the TypeInfoResolver is used).
             if (optional.IsDefined)
                 _valueConverter.Write(writer, optional.Value, options);
+            // Trying to throw an exception here will just break single property serialization:
+            // else
+            //     throw new InvalidOperationException($"Expected {nameof(OptionalSystemTextJsonExtensions)}.{nameof(OptionalSystemTextJsonExtensions.IgnoreUndefinedOptionals)} to be registered as a modifier, otherwise the property name will be printed in the output JSON.");
         }
     }
 }

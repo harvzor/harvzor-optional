@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using Harvzor.Optional.JsonConverter.BaseTests;
 
 namespace Harvzor.Optional.SystemTextJson.Tests;
@@ -14,6 +15,10 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
         Converters =
         {
             new OptionalJsonConverter()
+        },
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver
+        {
+            Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
         }
     };
 
