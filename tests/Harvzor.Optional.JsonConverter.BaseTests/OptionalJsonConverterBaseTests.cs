@@ -465,7 +465,52 @@ public abstract class OptionalJsonConverterBaseTests
 
     #endregion Property In Nested Object
     
-    // todo: ensure that collections of Optionals work as expected
+    #region Optional In Collection
+
+    [Fact]
+    [Trait("Category","Optional In Collections")]
+    public void WriteJson_ShouldWriteCorrectly_WhenUndefinedAndDefinedAndNullValuesInCollection()
+    {
+        // Arrange
+
+        var collection = new List<Optional<string?>>
+        {
+            new(),
+            new(null),
+            new("some value"),
+        };
+
+        // Act
+
+        string json = Serialize(collection);
+
+        // Assert
+
+        json.ShouldBe("[null,\"some value\"]");
+    }
+    
+    [Fact]
+    [Trait("Category","Optional In Collections")]
+    public void ReadJson_ShouldReadCorrectly_WhenNullAndDefinedInCollection()
+    {
+        // Arrange
+
+        string json = "[null,\"some value\"]";
+
+        // Act
+
+        List<Optional<string?>> collection = Deserialize<List<Optional<string?>>>(json);
+
+        // Assert
+
+        collection[0].IsDefined.ShouldBe(true);
+        collection[0].Value.ShouldBe(null);
+        
+        collection[1].IsDefined.ShouldBe(true);
+        collection[1].Value.ShouldBe("some value");
+    }
+    
+    #endregion Optional In Collection
 
     private class ClassWithOptionalProperty
     {
