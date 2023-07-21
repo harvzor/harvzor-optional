@@ -15,6 +15,8 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
             {
                 new OptionalJsonConverter(),
             },
+            // Isn't needed as the contract resolver only effects writing:
+            // ContractResolver = new OptionalShouldSerializeContractResolver(),
         })!;
     }
 
