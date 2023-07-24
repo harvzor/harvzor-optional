@@ -134,10 +134,27 @@ services.AddSwaggerGen(options =>
         Type = "string"
     });
     
+    options.MapType<Optional<int>>(() => new OpenApiSchema
+    {
+        Type = "integer"
+    });
+    
+    options.MapType<Optional<float>>(() => new OpenApiSchema
+    {
+        Type = "number"
+    });
+    
+    options.MapType<Optional<double>>(() => new OpenApiSchema
+    {
+        Type = "number"
+    });
+    
     options.MapType<Optional<bool>>(() => new OpenApiSchema
     {
         Type = "boolean"
     });
+    
+    // todo: array, object?
 });
 ```
 
