@@ -1,9 +1,14 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Harvzor.Optional.SystemTextJson;
 using Harvzor.Optional;
 
 JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions();
 jsonSerializerOptions.Converters.Add(new OptionalJsonConverter());
+jsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+{
+    Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
+};
 
 // The JSON would normally come from some external data source:
 string json = "{\"DefinedProperty\":\"Bar\"}";

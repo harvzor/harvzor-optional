@@ -1,4 +1,6 @@
+using System.Text.Json.Serialization.Metadata;
 using Harvzor.Optional;
+using Harvzor.Optional.SystemTextJson;
 using Microsoft.OpenApi.Models;
 using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
@@ -14,7 +16,14 @@ builder.Services
         });
     });
 
-builder.Services.Configure<JsonOptions>(o => o.SerializerOptions.Converters.Add(new Harvzor.Optional.SystemTextJson.OptionalJsonConverter()));
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(new OptionalJsonConverter());
+    options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+    {
+        Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
+    };
+});
 
 var app = builder.Build();
 

@@ -75,6 +75,10 @@ using Harvzor.Optional;
 
 JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions();
 jsonSerializerOptions.Converters.Add(new Harvzor.Optional.SystemTextJson.OptionalJsonConverter());
+jsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+{
+    Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
+};
 
 // The JSON would normally come from some external data source:
 string json = "{\"DefinedProperty\":\"Bar\"}";
@@ -109,6 +113,10 @@ services
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new Harvzor.Optional.SystemTextJson.OptionalJsonConverter());
+        options.JsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+        {
+            Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
+        };
     });
 ```
 
