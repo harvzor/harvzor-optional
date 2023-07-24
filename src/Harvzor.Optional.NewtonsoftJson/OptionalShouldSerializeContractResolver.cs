@@ -6,6 +6,8 @@ using Newtonsoft.Json.Serialization;
 namespace Harvzor.Optional.NewtonsoftJson;
 
 /// <summary>
+/// Ensures that only properties with defined values are printed in the output JSON when serializing. Without this, the
+/// property name will still be serialized, but without a value.
 /// https://github.com/JamesNK/Newtonsoft.Json/issues/1859#issuecomment-463061596
 /// </summary>
 public class OptionalShouldSerializeContractResolver : DefaultContractResolver

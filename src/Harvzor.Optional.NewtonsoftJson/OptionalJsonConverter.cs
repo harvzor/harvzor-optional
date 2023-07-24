@@ -9,6 +9,9 @@ namespace Harvzor.Optional.NewtonsoftJson;
 
 /// <summary>
 /// Register this customer Newtonsoft converter to get JSON support of <see cref="Optional{T}"/>. Docs: https://www.newtonsoft.com/json/help/html/CustomJsonConverter.htm
+/// <br/><br/>
+/// This converter ensures that the actual value is read and written correctly, but cannot effect how / if the property
+/// name is serialized (the <see cref="OptionalShouldSerializeContractResolver"/> can do that).
 /// </summary>
 /// <remarks>
 /// Dev note: It's generally better to use `JsonConverter&lt;T&gt;` because that only has to convert a specific property,

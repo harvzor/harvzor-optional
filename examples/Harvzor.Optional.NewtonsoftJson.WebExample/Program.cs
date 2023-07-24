@@ -1,4 +1,5 @@
 using Harvzor.Optional;
+using Harvzor.Optional.NewtonsoftJson;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
@@ -20,7 +21,8 @@ builder.Services
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-7.0#configure-json-deserialization-options-for-body-binding
     .AddNewtonsoftJson(options =>
     {
-        options.SerializerSettings.Converters.Add(new Harvzor.Optional.NewtonsoftJson.OptionalJsonConverter());
+        options.SerializerSettings.Converters.Add(new OptionalJsonConverter());
+        options.SerializerSettings.ContractResolver = new OptionalShouldSerializeContractResolver();
     });
 
 var app = builder.Build();
