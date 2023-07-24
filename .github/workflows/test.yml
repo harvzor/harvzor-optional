@@ -10,12 +10,12 @@ jobs:
     name: Test
     needs: build
     uses: ./.github/workflows/reusable-test.yml
-#  codecov:
-#    name: Upload coverage reports to Codecov
-#    needs: Test
-#    env:
-#      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Upload coverage reports to Codecov
-#        uses: codecov/codecov-action@v3
+  codecov:
+    name: Upload coverage reports to Codecov
+    needs: Test
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
