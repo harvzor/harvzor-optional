@@ -193,3 +193,5 @@ docker-compose run --rm push-nuget --api-key {key}
 
 - https://stackoverflow.com/questions/63418549/custom-json-serializer-for-optional-property-with-system-text-json
 - https://stackoverflow.com/questions/12522000/optionally-serialize-a-property-based-on-its-runtime-value
+- Optional in Swagger definition and how to handle generic types: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2359
+  - ISchemaGenerator: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2333#issuecomment-1035695675
