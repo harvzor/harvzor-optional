@@ -17,13 +17,11 @@ builder.Services
         //     Type = "string"
         // });
         
-        // // Ensures that the weird extra types are never actually added, and are just mapped to string.
-        // options.MapType(typeof(Optional<>), () => new OpenApiSchema { Type = "string" } );
-        //
-        // // Remaps from strings to correct actual values.
-        // options.SchemaFilter<OptionalSchemaFilter>();
+        // Ensures that the weird extra types are never actually added, and are just mapped to string.
+        options.MapType(typeof(Optional<>), () => new OpenApiSchema { Type = "string" } );
 
-        options.DoOptionalStuff();
+        // Remaps from strings to correct actual values.
+        options.SchemaFilter<OptionalSchemaFilter>();
     });
 
 builder.Services.Configure<JsonOptions>(options =>
@@ -144,48 +142,4 @@ public class OptionalSchemaFilter : ISchemaFilter
     //         schema.Reference = new OpenApiReference { Id = $"{baseSchemaName}", Type = ReferenceType.Schema };
     //     }
     // }
-}
-
-public static class OptionalSwaggerGen
-{
-    public static void DoOptionalStuff(this SwaggerGenOptions options)
-    {
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        
-        Type optionalType = typeof(Optional<>);
-        List<Type> propertiesUsingOptional = assembly.GetTypes()
-            // todo: also check parameters of methods
-            // todo: also check fields?
-            .SelectMany(assemblyType => assemblyType.GetProperties()
-                .Select(x => x.PropertyType)
-                .Where(propertyType => propertyType.IsGenericType
-                    && propertyType.GetGenericTypeDefinition() == optionalType
-                )
-            )
-            .Distinct()
-            .ToList();
-        
-        foreach (Type propertyType in propertiesUsingOptional)
-        {
-            Type argumentType = propertyType.GetGenericArguments().First();
-            
-            string? stringType;
-            if (argumentType == typeof(int) || argumentType == typeof(int?))
-                stringType = "integer";
-            else if (argumentType == typeof(string))
-                stringType = "string";
-            else if (argumentType == typeof(bool) || argumentType == typeof(bool?))
-                stringType = "boolean";
-            // todo: check if argumentType is a class
-            else
-                continue;
-
-            options.MapType(propertyType, () => new()
-            {
-                Type = stringType,
-                // todo: can return true, but doesn't do anything?
-                Nullable = argumentType.IsGenericType && argumentType.GetGenericTypeDefinition() == typeof(Nullable<>)
-            });
-        }
-    }
 }
