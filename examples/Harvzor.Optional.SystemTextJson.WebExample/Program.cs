@@ -49,7 +49,12 @@ app
 
 app.Run();
 
-record Foo
+record Foo : Bar
+{
+    public Optional<Bar> Bar { get; set; }
+}
+
+record Bar
 {
     public Optional<string?> OptionalNullableString { get; set; }
     
