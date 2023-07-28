@@ -51,7 +51,9 @@ app.Run();
 
 record Foo : Bar
 {
-    public Optional<Bar> Bar { get; set; }
+    public Optional<Bar> OptionalBar { get; set; }
+    
+    public Bar Bar { get; set; }
 }
 
 record Bar
@@ -89,11 +91,24 @@ public class OptionalSchemaFilter : ISchemaFilter
         {
             Type itemType = context.Type.GetGenericArguments()[0];
             OpenApiSchema? genericPartType = context.SchemaGenerator.GenerateSchema(itemType, context.SchemaRepository);
-        
-            schema.Type = genericPartType.Type;
-            schema.Properties.Clear();
 
-            return;
+            // If `Type` is null, it's property a user defined class.
+            if (genericPartType.Type == null)
+            {
+                // schema.Reference = new OpenApiReference()
+                // {
+                //     Id = "#/components/schemas/" + itemType.Name,
+                // };
+                // schema.Type = null;
+                // schema.Properties.Clear();
+            }
+            else
+            {
+                schema.Type = genericPartType.Type;
+                schema.Properties.Clear();
+                
+                return;
+            }
         }
 
         if (context.Type.GetProperties().Any(p =>
@@ -113,9 +128,20 @@ public class OptionalSchemaFilter : ISchemaFilter
                     Type propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
                     OpenApiSchema? propertyGenericPartType = context.SchemaGenerator.GenerateSchema(propertyType, context.SchemaRepository);
 
-                    property.Value.Type = propertyGenericPartType.Type;
-                    property.Value.Properties.Clear();
-                    property.Value.Reference = null;
+                    // If `Type` is null, it's property a user defined class.
+                    // The property.Value.Reference should then be defined.
+                    if (propertyGenericPartType.Type == null)
+                    {
+                        // It's set to string if `options.MapType(typeof(Optional<>), () => new OpenApiSchema { Type = "string" } );` is used.
+                        property.Value.Type = null;
+                        property.Value.Reference = propertyGenericPartType.Reference;
+                    }
+                    else
+                    {
+                        property.Value.Type = propertyGenericPartType.Type;
+                        property.Value.Properties.Clear();
+                        property.Value.Reference = null;
+                    }
                 }
             }
         }
