@@ -12,7 +12,8 @@ builder.Services
         {
             Type = "string"
         });
-    });
+    })
+    .AddSwaggerGenNewtonsoftSupport();
 
 builder.Services
     .AddControllers()
