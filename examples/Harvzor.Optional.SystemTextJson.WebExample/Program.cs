@@ -48,7 +48,7 @@ app.Run();
 
 record Foo : Bar
 {
-    // public Optional<Bar> OptionalBar { get; set; }
+    public Optional<Bar> OptionalBar { get; set; }
     
     public Bar Bar { get; set; }
 }
@@ -174,28 +174,58 @@ public class OptionalSchemaFilter : ISchemaFilter
 /// </summary>
 public static class Solution2
 {
-    private static void RemapUserClass<T>(this SwaggerGenOptions options) where T : class
+    private static void RemapUserClass(this SwaggerGenOptions options, params Type[] types)
     {
-        try
+        // todo: remove? other types shouldn't be mapped anyway?
+        var filteredTypes = types
+            .Where(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(Optional<>));
+        
+        foreach (Type type in filteredTypes)
         {
-            // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other types
-            // like Optional<int> are (even if they've been mapped!).
-            options.MapType<Optional<T>>(() => new OpenApiSchema
+            Type argumentType = type.GetGenericArguments().First();
+            
+            try
             {
-                Type = "object",
-                Reference = new OpenApiReference()
+                // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other types
+                // like Optional<int> are (even if they've been mapped!).
+                options.MapType(type, () => new OpenApiSchema
                 {
-                    Id = typeof(T).Name,
-                    Type = ReferenceType.Schema,
-                }
-            });
-        }
-        catch (Exception)
-        {
-            // todo: find a nicer way to deal with types being added multiple times (somehow look through schema repo?)
-        }
+                    Type = "object",
+                    Reference = new OpenApiReference()
+                    {
+                        Id = argumentType.Name,
+                        Type = ReferenceType.Schema,
+                    }
+                });
+            }
+            catch (Exception)
+            {
+                // todo: find a nicer way to deal with types being added multiple times (somehow look through schema repo?)
+            }
 
-        options.DocumentFilter<OptionalDocumentFilter<T>>();
+            // This should do the same as `options.DocumentFilter<OptionalDocumentFilter<T>>();`
+            {
+                // Can't call this:
+                // options.DocumentFilter<OptionalDocumentFilter>(argumentType);
+
+                Type? genericType;
+                // Create OptionalDocumentFilter<T>.
+                {
+                    Type optionalDocumentFilterType = typeof(OptionalDocumentFilter<>);
+                    genericType = optionalDocumentFilterType.MakeGenericType(argumentType);
+                }
+
+                // Invoke `options.DocumentFilter<OptionalDocumentFilter<T>>()` but with `genericType` instead of `<T>`;
+                {
+                    MethodInfo documentFilterMethod = typeof(SwaggerGenOptionsExtensions)
+                        .GetMethod(nameof(SwaggerGenOptionsExtensions.DocumentFilter))!;
+
+                    MethodInfo genericDocumentFilterMethod = documentFilterMethod.MakeGenericMethod(genericType);
+
+                    genericDocumentFilterMethod.Invoke(null, new object?[] { options, Array.Empty<object>() });
+                }
+            }
+        }
     }
     
     /// <summary>
@@ -228,10 +258,72 @@ public static class Solution2
             Type = "integer",
             Nullable = true
         });
+        
+        options.RemapUserClass(typeof(Foo));
+        options.RemapUserClass(typeof(Bar));
+    }
+    
+    private static void LoopOverCustomStuff(this SwaggerGenOptions options)
+    {
+        Assembly assembly = Assembly.GetExecutingAssembly();
+        
+        Type optionalType = typeof(Optional<>);
+        List<Type> propertiesUsingOptional = assembly.GetTypes()
+            // todo: also check parameters of methods
+            // todo: also check fields?
+            .SelectMany(assemblyType =>
+            {
+                IEnumerable<Type> optionalProperties = assemblyType.GetProperties()
+                    .Select(x => x.PropertyType)
+                    .Where(propertyType => propertyType.IsGenericType
+                        && propertyType.GetGenericTypeDefinition() == optionalType
+                    );
+                    
+                // todo: I think this doesn't find Optional<Foo> because there's no method defined in this assembly,
+                // as it's defined in a handler or something.
+                IEnumerable<Type> optionalParameters = assemblyType
+                    .GetMethods(/*BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static*/)
+                    .SelectMany(method => method.GetParameters().Select(x => x.ParameterType))
+                    .Where(parameterType => parameterType.IsGenericType
+                        && parameterType.GetGenericTypeDefinition() == optionalType
+                    );
 
-        options.RemapUserClass<Foo>();
-        options.RemapUserClass<Bar>();
-        options.RemapUserClass<Bar>();
+                return optionalProperties.Concat(optionalParameters).ToArray();
+            })
+            .Distinct()
+            .ToList();
+        
+        foreach (Type propertyType in propertiesUsingOptional)
+        {
+            Type argumentType = propertyType.GetGenericArguments().First();
+            
+            string? stringType;
+            if (argumentType == typeof(int) || argumentType == typeof(int?))
+                stringType = "integer";
+            else if (argumentType == typeof(string))
+                stringType = "string";
+            else if (argumentType == typeof(bool) || argumentType == typeof(bool?))
+                stringType = "boolean";
+            else if (argumentType.Assembly == assembly)
+                stringType = "object";
+            else
+                continue;
+
+            if (stringType == "object")
+            {
+                options.RemapUserClass(propertyType);
+            }
+            else
+            {
+                options.MapType(propertyType, () => new OpenApiSchema
+                {
+                    Type = stringType,
+                    // todo: can return true, but doesn't do anything?
+                    Nullable = argumentType.IsGenericType
+                               && argumentType.GetGenericTypeDefinition() == typeof(Nullable<>)
+                });
+            }
+        }
     }
     
     // private class OptionalObjectsSchemaFilter : ISchemaFilter
@@ -268,8 +360,10 @@ public static class Solution2
     
     public static void FixOptional(this SwaggerGenOptions options)
     {
-        options.EnsureBadObjectsDontShow();
-        
+        options.LoopOverCustomStuff();
+
+        // options.EnsureBadObjectsDontShow();
+
         // options.SchemaFilter<OptionalObjectsSchemaFilter>();
     }
 }
