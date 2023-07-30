@@ -176,18 +176,25 @@ public static class Solution2
 {
     private static void RemapUserClass<T>(this SwaggerGenOptions options) where T : class
     {
-        // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other types
-        // like Optional<int> are (even if they've been mapped!).
-        options.MapType<Optional<T>>(() => new OpenApiSchema
+        try
         {
-            Type = "object",
-            Reference = new OpenApiReference()
+            // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other types
+            // like Optional<int> are (even if they've been mapped!).
+            options.MapType<Optional<T>>(() => new OpenApiSchema
             {
-                Id = typeof(T).Name,
-                Type = ReferenceType.Schema,
-            }
-        });
-        
+                Type = "object",
+                Reference = new OpenApiReference()
+                {
+                    Id = typeof(T).Name,
+                    Type = ReferenceType.Schema,
+                }
+            });
+        }
+        catch (Exception)
+        {
+            // todo: find a nicer way to deal with types being added multiple times (somehow look through schema repo?)
+        }
+
         options.DocumentFilter<OptionalDocumentFilter<T>>();
     }
     
@@ -224,6 +231,7 @@ public static class Solution2
 
         options.RemapUserClass<Foo>();
         options.RemapUserClass<Bar>();
+        options.RemapUserClass<Bar>();
     }
     
     // private class OptionalObjectsSchemaFilter : ISchemaFilter
@@ -253,7 +261,8 @@ public static class Solution2
     {
         public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {
-            context.SchemaGenerator.GenerateSchema(typeof(T), context.SchemaRepository);
+            if (!context.SchemaRepository.Schemas.ContainsKey(typeof(T).Name))
+                context.SchemaGenerator.GenerateSchema(typeof(T), context.SchemaRepository);
         }
     }
     
