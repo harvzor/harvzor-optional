@@ -1,6 +1,7 @@
+using System.Reflection;
 using Harvzor.Optional;
+using Harvzor.Optional.Swashbuckle;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,10 +9,11 @@ builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
-        options.MapType<Optional<string>>(() => new OpenApiSchema
-        {
-            Type = "string"
-        });
+        options.FixOptional(Assembly.GetExecutingAssembly());
+        // options.MapType<Optional<string>>(() => new OpenApiSchema
+        // {
+        //     Type = "string"
+        // });
     });
 
 builder.Services
@@ -40,23 +42,53 @@ app.Run();
 [ApiController]
 public class IndexController : Controller
 {
-    [HttpGet]
-    public string Get()
-    {
-        return "Hello World!";
-    }
+    // [HttpGet]
+    // public string Get()
+    // {
+    //     return "Hello World!";
+    // }
     
     [HttpPost]
-    public string Post(Foo foo)
+    // todo: Optional<Foo> doesn't work here?
+    public Optional<Foo> Post(Optional<Foo> foo)
     {
-        if (foo.OptionalString.IsDefined)
-            return $"You're value is \"{foo.OptionalString.Value ?? "null"}\".";
-        
-        return "You sent nothing.";
+        return foo;
     }
 }
 
-public record Foo
+public record Foo : Bar
 {
-    public Optional<string?> OptionalString { get; set; }
+    public Optional<Bar?> OptionalNullableBar { get; set; }
+    
+    public Optional<Bar> OptionalBar { get; set; }
+
+    public Bar? NullableBar { get; set; }
+    
+    public Bar Bar { get; set; }
+}
+
+public record Bar
+{
+    public Optional<string?> OptionalNullableString { get; set; }
+    
+    // todo: I feel like `null` shouldn't be allowed?
+    public Optional<string> OptionalString { get; set; }
+    
+    public string String { get; set; }
+    
+    public Optional<int?> OptionalNullableInt { get; set; }
+    
+    public Optional<int> OptionalInt { get; set; }
+    
+    public int? NullableInt { get; set; }
+    
+    public int Int { get; set; }
+    
+    // public Optional<DateTime?> OptionalNullableDateTime { get; set; }
+    //
+    // public Optional<DateTime> OptionalDateTime { get; set; }
+    //
+    // public DateTime? NullableDateTime { get; set; }
+    //
+    // public DateTime DateTime { get; set; }
 }

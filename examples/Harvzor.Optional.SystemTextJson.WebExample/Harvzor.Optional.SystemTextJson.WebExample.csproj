@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Harvzor.Optional.Swashbuckle\Harvzor.Optional.Swashbuckle.csproj" />
       <ProjectReference Include="..\..\src\Harvzor.Optional.SystemTextJson\Harvzor.Optional.SystemTextJson.csproj" />
     </ItemGroup>
 
