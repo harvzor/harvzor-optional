@@ -85,7 +85,7 @@ public record Bar
     //
     // public Optional<int?> OptionalNullableInt { get; set; }
     //
-    public Optional<int> OptionalInt { get; set; }
+    // public Optional<int> OptionalInt { get; set; }
     //
     // public int? NullableInt { get; set; }
     //
@@ -100,4 +100,8 @@ public record Bar
     // public DateTime DateTime { get; set; }
     //
     // public Optional<Version> OptionalVersion { get; set; }
+    
+    public Optional<int[]> OptionalIntArray { get; set; }
+
+    public int[] IntArray { get; set; } = { };
 }

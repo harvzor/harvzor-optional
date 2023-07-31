@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -91,58 +92,44 @@ public static class OptionalSwashbuckle
         {
             Type argumentType = typeUsingOptional.GetGenericArguments().First();
             
-            string? stringType;
-            string? format = null;
-            
-            if (argumentType == typeof(int) || argumentType == typeof(int?))
-            {
-                stringType = "integer";
-                format = "int32";
-            }
-            else if (argumentType == typeof(long) || argumentType == typeof(long?))
-            {
-                stringType = "integer";
-                format = "int64";
-            }
-            else if (argumentType == typeof(float) || argumentType == typeof(float?))
-            {
-                stringType = "number";
-                format = "float";
-            }
-            else if (argumentType == typeof(double) || argumentType == typeof(double?))
-            {
-                stringType = "number";
-                format = "double";
-            }
-            else if (argumentType == typeof(string))
-            {
-                stringType = "string";
-            }
-            else if (argumentType == typeof(bool) || argumentType == typeof(bool?))
-            {
-                stringType = "boolean";
-            }
-            else if (argumentType == typeof(DateTime) || argumentType == typeof(DateTime?))
-            {
-                stringType = "string";
-                format = "date-time";
-            }
-            // Not supported in netstandard:
-            // else if (argumentType == typeof(DateOnly) || argumentType == typeof(DateOnly?))
-            // {
-            //     stringType = "string";
-            //     format = "date";
-            // }
-            // todo: handle arrays?
-            // todo: provide docs on how to manage other types? or is it better to try to map simple types without this hack?
-            else
-            {
-                stringType = "object";
-            }
-            
+            GetTypeAndFormat(argumentType, out string stringType, out string? format);
+
             if (stringType == "object")
             {
                 options.RemapOptionalObject(typeUsingOptional);
+            }
+            else if (stringType == "array")
+            {
+                Type arrayType;
+                
+                // Statement will only pass if it's really IEnumerable<object>, object[] won't pass:
+                if ((argumentType.IsGenericType && argumentType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                    || argumentType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
+                    arrayType = argumentType.GetGenericArguments()[0];
+                // object[] will pass:
+                else if (argumentType.IsArray)
+                    arrayType = argumentType.GetElementType()!;
+                else
+                {
+                    // todo: don't throw?
+                    throw new Exception("unexpected type");
+                }
+                
+                GetTypeAndFormat(arrayType, out string arrayStringType, out string? arrayFormat);
+                
+                // todo: handle an array in an array
+                options.MapType(typeUsingOptional, () => new OpenApiSchema
+                {
+                    Type = stringType,
+                    Format = format,
+                    // todo: not sure if it should be nullable
+                    Nullable = true,
+                    Items = new OpenApiSchema()
+                    {
+                        Type = arrayStringType,
+                        Format = arrayFormat
+                    }
+                });
             }
             else
             {
@@ -160,7 +147,62 @@ public static class OptionalSwashbuckle
             }
         }
     }
-    
+
+    private static void GetTypeAndFormat(Type argumentType, out string stringType, out string? format)
+    {
+        format = null;
+
+        if (argumentType == typeof(int) || argumentType == typeof(int?))
+        {
+            stringType = "integer";
+            format = "int32";
+        }
+        else if (argumentType == typeof(long) || argumentType == typeof(long?))
+        {
+            stringType = "integer";
+            format = "int64";
+        }
+        else if (argumentType == typeof(float) || argumentType == typeof(float?))
+        {
+            stringType = "number";
+            format = "float";
+        }
+        else if (argumentType == typeof(double) || argumentType == typeof(double?))
+        {
+            stringType = "number";
+            format = "double";
+        }
+        else if (argumentType == typeof(string))
+        {
+            stringType = "string";
+        }
+        else if (argumentType == typeof(bool) || argumentType == typeof(bool?))
+        {
+            stringType = "boolean";
+        }
+        else if (argumentType == typeof(DateTime) || argumentType == typeof(DateTime?))
+        {
+            stringType = "string";
+            format = "date-time";
+        }
+        // Not supported in netstandard:
+        // else if (argumentType == typeof(DateOnly) || argumentType == typeof(DateOnly?))
+        // {
+        //     stringType = "string";
+        //     format = "date";
+        // }
+        // Statement will pass if either object[] or IEnumerable<object>:
+        else if (typeof(IEnumerable).IsAssignableFrom(argumentType))
+        {
+            stringType = "array";
+        }
+        // todo: provide docs on how to manage other types? or is it better to try to map simple types without this hack?
+        else
+        {
+            stringType = "object";
+        }
+    }
+
     /// <summary>
     /// Ensure that an <see cref="Optional{T}"/> type which had been removed from the repo by mapping it to an object
     /// reference, then has its generic type included in the schema repository.
