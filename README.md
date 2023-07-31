@@ -231,7 +231,16 @@ services.AddSwaggerGen(options =>
         Format = "date-time"
     });
     
-    // todo: array, object?
+    // IEnumerables:
+    options.MapType<Optional<IEnumerable<int>>>(() => new OpenApiSchema
+    {
+        Type = "array",
+        Items = new OpenApiSchema
+        {
+            Type = "integer",
+            Format = "int32"
+        }
+    });
 });
 ```
 

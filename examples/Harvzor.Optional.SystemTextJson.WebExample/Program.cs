@@ -101,7 +101,11 @@ public record Bar
     //
     // public Optional<Version> OptionalVersion { get; set; }
     
-    public Optional<int[]> OptionalIntArray { get; set; }
+    // public Optional<int[]> OptionalIntArray { get; set; }
+    //
+    // public int[] IntArray { get; set; } = { };
+    
+    public Optional<int[][]> OptionalIntArrayArray { get; set; }
 
-    public int[] IntArray { get; set; } = { };
+    public int[][] IntArrayArray { get; set; }
 }

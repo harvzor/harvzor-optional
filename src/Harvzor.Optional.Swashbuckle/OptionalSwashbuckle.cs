@@ -87,103 +87,134 @@ public static class OptionalSwashbuckle
             })
             .Distinct();
         
-        // Fix the mappings for Optional<T>s.
+        // Fix the mappings for Optional<T>'s:
         foreach (Type typeUsingOptional in typesUsingOptional)
-        {
-            Type argumentType = typeUsingOptional.GetGenericArguments().First();
-            
-            GetTypeAndFormat(argumentType, out string stringType, out string? format);
+            options.MapType(typeUsingOptional);
+    }
 
-            if (stringType == "object")
+    private static void MapType(this SwaggerGenOptions options, Type typeUsingOptional)
+    {
+        Type argumentType = typeUsingOptional.GetGenericArguments().First();
+        
+        GetTypeAndFormat(argumentType, out string argumentOpenApiType, out string? argumentFormat);
+        
+        if (argumentOpenApiType == "object")
+        {
+            options.RemapOptionalObject(typeUsingOptional);
+        }
+        else if (argumentOpenApiType == "array")
+        {
+            options.MapType(typeUsingOptional, () => GetSchemaOfArray(argumentType));
+        }
+        // Normal types:
+        else
+        {
+            options.MapType(typeUsingOptional, () => new OpenApiSchema
             {
-                options.RemapOptionalObject(typeUsingOptional);
-            }
-            else if (stringType == "array")
-            {
-                Type arrayType;
-                
-                // Statement will only pass if it's really IEnumerable<object>, object[] won't pass:
-                if ((argumentType.IsGenericType && argumentType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                    || argumentType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
-                    arrayType = argumentType.GetGenericArguments()[0];
-                // object[] will pass:
-                else if (argumentType.IsArray)
-                    arrayType = argumentType.GetElementType()!;
-                else
-                {
-                    // todo: don't throw?
-                    throw new Exception("unexpected type");
-                }
-                
-                GetTypeAndFormat(arrayType, out string arrayStringType, out string? arrayFormat);
-                
-                // todo: handle an array in an array
-                options.MapType(typeUsingOptional, () => new OpenApiSchema
-                {
-                    Type = stringType,
-                    Format = format,
-                    // todo: not sure if it should be nullable
-                    Nullable = true,
-                    Items = new OpenApiSchema()
-                    {
-                        Type = arrayStringType,
-                        Format = arrayFormat
-                    }
-                });
-            }
-            else
-            {
-                options.MapType(typeUsingOptional, () => new OpenApiSchema
-                {
-                    Type = stringType,
-                    Format = format,
-                    // todo: can return true, but doesn't do anything? worked if same code is used with Deprecated
-                    Nullable = argumentType.IsReferenceOrNullableType() // Should catch `string` and `int?`.
-                        // || (
-                        //     argumentType.IsGenericType
-                        //     && argumentType.GetGenericTypeDefinition() == typeof(Nullable<>)
-                        // ),
-                });
-            }
+                Type = argumentOpenApiType,
+                Format = argumentFormat,
+                // todo: can return true, but doesn't do anything? worked if same code is used with Deprecated
+                Nullable = argumentType.IsReferenceOrNullableType() // Should catch `string` and `int?`.
+                    // || (
+                    //     argumentType.IsGenericType
+                    //     && argumentType.GetGenericTypeDefinition() == typeof(Nullable<>)
+                    // ),
+            });
         }
     }
 
-    private static void GetTypeAndFormat(Type argumentType, out string stringType, out string? format)
+    private static OpenApiSchema GetSchemaOfArray(Type argumentType)
     {
-        format = null;
+        Type arrayType;
+            
+        // object[] will pass:
+        if (argumentType.IsArray)
+            arrayType = argumentType.GetElementType()!;
+        // object[] would also pass here so the order is important here:
+        else if (
+            (argumentType.IsGenericType && argumentType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            || argumentType.GetInterfaces().Any(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+        )
+        {
+            arrayType = argumentType.GetGenericArguments()[0];
+        }
+        else
+        {
+            // todo: don't throw?
+            throw new Exception("unexpected type");
+        }
+        
+        GetTypeAndFormat(arrayType, out string arrayStringType, out string? arrayFormat);
+
+        // If it's a multidimensional array...
+        if (arrayStringType == "array")
+        {
+            return new OpenApiSchema
+            {
+                Type = "array",
+                // todo: not sure if it should be nullable
+                Nullable = true,
+                Items = GetSchemaOfArray(arrayType)
+            };
+        }
+        else
+        {
+            return new OpenApiSchema
+            {
+                Type = "array",
+                // todo: not sure if it should be nullable
+                Nullable = true,
+                Items = new OpenApiSchema()
+                {
+                    Type = arrayStringType,
+                    Format = arrayFormat
+                }
+            };
+        }
+
+        // // If it's a multidimensional array...
+        // if (typeof(IEnumerable).IsAssignableFrom(argumentType))
+        // {
+        //     
+        // }
+    }
+
+    private static void GetTypeAndFormat(Type argumentType, out string argumentOpenApiType, out string? argumentFormat)
+    {
+        argumentFormat = null;
 
         if (argumentType == typeof(int) || argumentType == typeof(int?))
         {
-            stringType = "integer";
-            format = "int32";
+            argumentOpenApiType = "integer";
+            argumentFormat = "int32";
         }
         else if (argumentType == typeof(long) || argumentType == typeof(long?))
         {
-            stringType = "integer";
-            format = "int64";
+            argumentOpenApiType = "integer";
+            argumentFormat = "int64";
         }
         else if (argumentType == typeof(float) || argumentType == typeof(float?))
         {
-            stringType = "number";
-            format = "float";
+            argumentOpenApiType = "number";
+            argumentFormat = "float";
         }
         else if (argumentType == typeof(double) || argumentType == typeof(double?))
         {
-            stringType = "number";
-            format = "double";
+            argumentOpenApiType = "number";
+            argumentFormat = "double";
         }
         else if (argumentType == typeof(string))
         {
-            stringType = "string";
+            argumentOpenApiType = "string";
         }
         else if (argumentType == typeof(bool) || argumentType == typeof(bool?))
         {
-            stringType = "boolean";
+            argumentOpenApiType = "boolean";
         }
         else if (argumentType == typeof(DateTime) || argumentType == typeof(DateTime?))
         {
-            stringType = "string";
-            format = "date-time";
+            argumentOpenApiType = "string";
+            argumentFormat = "date-time";
         }
         // Not supported in netstandard:
         // else if (argumentType == typeof(DateOnly) || argumentType == typeof(DateOnly?))
@@ -194,12 +225,12 @@ public static class OptionalSwashbuckle
         // Statement will pass if either object[] or IEnumerable<object>:
         else if (typeof(IEnumerable).IsAssignableFrom(argumentType))
         {
-            stringType = "array";
+            argumentOpenApiType = "array";
         }
         // todo: provide docs on how to manage other types? or is it better to try to map simple types without this hack?
         else
         {
-            stringType = "object";
+            argumentOpenApiType = "object";
         }
     }
 
