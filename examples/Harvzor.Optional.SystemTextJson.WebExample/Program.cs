@@ -3,9 +3,8 @@ using System.Text.Json.Serialization.Metadata;
 using Harvzor.Optional;
 using Harvzor.Optional.Swashbuckle;
 using Harvzor.Optional.SystemTextJson;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,25 +12,29 @@ builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
-        options.FixOptional(Assembly.GetExecutingAssembly());
-
-        // // Ensures that the weird extra types are never actually added, and are just mapped to string.
-        // options.MapType(typeof(Optional<>), () => new OpenApiSchema { Type = "string" } );
-        //
-        // // Remaps from strings to correct actual values.
-        // options.SchemaFilter<OptionalSchemaFilter>();
+        options.MapType<Optional<Version>>(() => new OpenApiSchema()
+        {
+            Type = "string"
+        });
+        
+        options.FixOptionalMappings(Assembly.GetExecutingAssembly());
     });
 
-builder.Services.Configure<JsonOptions>(options =>
-{
-    options.SerializerOptions.Converters.Add(new OptionalJsonConverter());
-    options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
     {
-        Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
-    };
-});
+        options.JsonSerializerOptions.Converters.Add(new OptionalJsonConverter());
+        options.JsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+        {
+            Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
+        };
+    });
 
 var app = builder.Build();
+
+app.UseRouting();
+app.MapDefaultControllerRoute();
 
 if (app.Environment.IsDevelopment())
 {
@@ -39,19 +42,36 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app
-//     .MapGet("/", () => "Hello World!");
-
-app
-    .MapPost("/", (Optional<Foo> foo) => foo);
-
 app.Run();
+
+[Route("/")]
+[ApiController]
+public class IndexController : Controller
+{
+    [HttpGet]
+    public string Get()
+    {
+        return "Hello World!";
+    }
+    
+    // [HttpPost]
+    // public Optional<Foo> Post(Optional<Foo> foo)
+    // {
+    //     return foo;
+    // }
+    
+    [HttpPost]
+    public Foo Post(Foo foo)
+    {
+        return foo;
+    }
+}
 
 public record Foo : Bar
 {
-    public Optional<Bar> OptionalBar { get; set; }
+    // public Optional<Bar> OptionalBar { get; set; }
     
-    public Bar Bar { get; set; }
+    // public Bar Bar { get; set; }
 }
 
 public record Bar
@@ -65,107 +85,19 @@ public record Bar
     //
     // public Optional<int?> OptionalNullableInt { get; set; }
     //
-    // public Optional<int> OptionalInt { get; set; }
+    public Optional<int> OptionalInt { get; set; }
     //
     // public int? NullableInt { get; set; }
     //
-    public int Int { get; set; }
-    
+    // public int Int { get; set; }
     //
     // public Optional<DateTime?> OptionalNullableDateTime { get; set; }
     //
     // public Optional<DateTime> OptionalDateTime { get; set; }
-}
-
-/// <summary>
-/// Ensures that <see cref="Optional{T}"/> is correctly displayed in the API Schema in Swagger.
-/// </summary>
-/// <remarks>
-/// https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2359#issuecomment-1114008607
-/// </remarks>
-public class OptionalSchemaFilter : ISchemaFilter
-{
-    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
-    {
-        if (context.Type.IsGenericType && context.Type.GetGenericTypeDefinition() == typeof(Optional<>))
-        {
-            Type itemType = context.Type.GetGenericArguments()[0];
-            OpenApiSchema? genericPartType = context.SchemaGenerator.GenerateSchema(itemType, context.SchemaRepository);
-
-            // If `Type` is null, it's property a user defined class.
-            if (genericPartType.Type == null)
-            {
-                // schema.Reference = new OpenApiReference()
-                // {
-                //     Id = "#/components/schemas/" + itemType.Name,
-                // };
-                // schema.Type = null;
-                // schema.Properties.Clear();
-            }
-            else
-            {
-                schema.Type = genericPartType.Type;
-                schema.Properties.Clear();
-                
-                return;
-            }
-        }
-
-        if (context.Type.GetProperties().Any(p =>
-                p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(Optional<>)))
-        {
-            foreach (var property in schema.Properties)
-            {
-                PropertyInfo? propertyInfo = context.Type.GetProperties()
-                    .FirstOrDefault(x => x.Name.Equals(property.Key, StringComparison.OrdinalIgnoreCase));
-
-                if (propertyInfo != null
-                    && propertyInfo.PropertyType.IsGenericType
-                    && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Optional<>))
-                {
-                    // context.SchemaRepository.Schemas.Remove(property.Value.Reference.Id);
-                    
-                    Type propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
-                    OpenApiSchema? propertyGenericPartType = context.SchemaGenerator.GenerateSchema(propertyType, context.SchemaRepository);
-
-                    // If `Type` is null, it's property a user defined class.
-                    // The property.Value.Reference should then be defined.
-                    if (propertyGenericPartType.Type == null)
-                    {
-                        // It's set to string if `options.MapType(typeof(Optional<>), () => new OpenApiSchema { Type = "string" } );` is used.
-                        property.Value.Type = null;
-                        property.Value.Reference = propertyGenericPartType.Reference;
-                    }
-                    else
-                    {
-                        property.Value.Type = propertyGenericPartType.Type;
-                        property.Value.Properties.Clear();
-                        property.Value.Reference = null;
-                    }
-                }
-            }
-        }
-    }
-    
-    // public void Apply(OpenApiSchema schema, SchemaFilterContext context)
-    // {
-    //     if (context.Type.IsGenericType && context.Type.GetGenericTypeDefinition() == typeof(Optional<>))
-    //     {
-    //         var argumentType = context.Type.GetGenericArguments().First();
-    //         var argumentSchema = context.SchemaGenerator.GenerateSchema(argumentType, context.SchemaRepository);
-    //         var baseSchemaName = $"{argumentType.Name}Foo";
-    //         var baseSchema = new OpenApiSchema()
-    //         {
-    //             Required = new SortedSet<string>() { "type" },
-    //             Type = "object",
-    //             Properties = new Dictionary<string, OpenApiSchema>
-    //             {
-    //                 { "type", argumentSchema }
-    //             }
-    //         };
-    //         context.SchemaRepository.AddDefinition(baseSchemaName, baseSchema);
-    //         schema.Type = "string";
-    //         schema.Reference = new OpenApiReference { Id = $"{baseSchemaName}", Type = ReferenceType.Schema };
-    //     }
-    // }
+    //
+    // public DateTime? NullableDateTime { get; set; }
+    //
+    // public DateTime DateTime { get; set; }
+    //
+    // public Optional<Version> OptionalVersion { get; set; }
 }

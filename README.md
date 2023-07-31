@@ -7,6 +7,7 @@
 | Harvzor.Optional                | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional)](https://www.nuget.org/packages/Harvzor.Optional/)                               |
 | Harvzor.Optional.SystemTextJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.SystemTextJson)](https://www.nuget.org/packages/Harvzor.Optional.SystemTextJson/) |
 | Harvzor.Optional.NewtonsoftJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.NewtonsoftJson)](https://www.nuget.org/packages/Harvzor.Optional.NewtonsoftJson/) |
+| Harvzor.Optional.Swashbuckle    | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.Swashbuckle)](https://www.nuget.org/packages/Harvzor.Optional.Swashbuckle/)       |
 
 ## The problem
 
@@ -130,9 +131,65 @@ services
     });
 ```
 
-#### Swagger support
+#### Harvzor.Optional.Swashbuckle
 
-If you're using Swashbuckle Swagger, you'll also need to tell it how your types should look:
+> **Warning**
+> This package is experimental.
+
+Swashbuckle SwaggerGen doesn't know how to handle `Optional<T>` and will attempt to generate complicated objects to express all the properties, for a simple class like:
+
+```csharp
+public class Foo
+{
+    public Optional<int> OptionalInt { get; set; }
+}
+```
+
+This ends up being generated like:
+
+![broken-swagger-docs.png](.github/docs/broken-swagger-docs.png)
+
+Instead we want SwaggerGen to treat `Optional<T>` as the generic type `T`. To handle doing this, add this:
+
+```csharp
+services
+    .AddSwaggerGen(options =>
+    {
+        options.FixOptionalMappings(Assembly.GetExecutingAssembly());
+    });
+```
+
+This results in the correct OpenAPI spec:
+
+![fixed-swagger-docs.png](.github/docs/fixed-swagger-docs.png)
+
+This will:
+
+- ensure that all basic types like `Optional<string>` are mapped to the `string` type in the OpenAPI schema
+- try to treat complex objects such as `Optional<MyType>` as the underlying generic type `MyType`
+
+This doesn't work in all cases though, for example, with `Optional<Version>`, we want it to be treated as a `string` type and not as a `Version`, so this must be added:
+
+```csharp
+// Add your custom mappings first:
+options.MapType<Optional<Version>>(() => new OpenApiSchema()
+{
+    Type = "string"
+});
+
+options.FixOptionalMappings(Assembly.GetExecutingAssembly());
+```
+
+##### Improvements
+
+This package could be improved if these issues are ever resolved:
+
+- https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1810
+- https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2359
+
+#### Alternative Swagger support
+
+If you're using Swashbuckle SwaggerGen but don't want to use `Harvzor.Optional.Swashbuckle`, you can also manually tell it how your types should look. Here are some basic types mapped:
 
 ```csharp
 services.AddSwaggerGen(options =>
@@ -144,17 +201,20 @@ services.AddSwaggerGen(options =>
     
     options.MapType<Optional<int>>(() => new OpenApiSchema
     {
-        Type = "integer"
+        Type = "integer",
+        Format = "int32"
     });
     
     options.MapType<Optional<float>>(() => new OpenApiSchema
     {
-        Type = "number"
+        Type = "number",
+        Format = "float"
     });
     
     options.MapType<Optional<double>>(() => new OpenApiSchema
     {
-        Type = "number"
+        Type = "number",
+        Format = "double"
     });
     
     options.MapType<Optional<bool>>(() => new OpenApiSchema
@@ -162,11 +222,44 @@ services.AddSwaggerGen(options =>
         Type = "boolean"
     });
     
+    options.MapType<Optional<DateTime>>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "date-time"
+    });
+    
     // todo: array, object?
 });
 ```
 
 You can see what basic types are available here: https://swagger.io/docs/specification/data-models/data-types/
+
+However, handling custom objects such as `Optional<MyObject>` is quite complicated and not recommended, however, here's how to do it anyway:
+
+```csharp
+// Rewrite the mapping so it's an object reference:
+options.MapType<Optional<MyObject>>(() => new OpenApiSchema
+{
+    Type = "object",
+    Format = format,
+    Reference = new OpenApiReference
+    {
+        Id = nameof(MyObject),
+        Type = ReferenceType.Schema,
+    }
+});
+
+// Now add `MyObject` to the schema repisitory so the mapping actually points somewhere:
+options.DocumentFilter<GenerateSchemaFor<MyObject>>();
+
+private class GenerateSchemaFor<T> : IDocumentFilter where T : class
+{
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+          context.SchemaGenerator.GenerateSchema(typeof(T), context.SchemaRepository);
+    }
+}
+```
 
 ## Use case: JSON Merge PATCH
 

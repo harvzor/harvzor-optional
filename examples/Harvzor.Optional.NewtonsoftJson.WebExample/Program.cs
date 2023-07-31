@@ -9,11 +9,7 @@ builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
-        options.FixOptional(Assembly.GetExecutingAssembly());
-        // options.MapType<Optional<string>>(() => new OpenApiSchema
-        // {
-        //     Type = "string"
-        // });
+        options.FixOptionalMappings(Assembly.GetExecutingAssembly());
     });
 
 builder.Services
@@ -42,14 +38,13 @@ app.Run();
 [ApiController]
 public class IndexController : Controller
 {
-    // [HttpGet]
-    // public string Get()
-    // {
-    //     return "Hello World!";
-    // }
+    [HttpGet]
+    public string Get()
+    {
+        return "Hello World!";
+    }
     
     [HttpPost]
-    // todo: Optional<Foo> doesn't work here?
     public Optional<Foo> Post(Optional<Foo> foo)
     {
         return foo;
@@ -84,11 +79,11 @@ public record Bar
     
     public int Int { get; set; }
     
-    // public Optional<DateTime?> OptionalNullableDateTime { get; set; }
-    //
-    // public Optional<DateTime> OptionalDateTime { get; set; }
-    //
-    // public DateTime? NullableDateTime { get; set; }
-    //
-    // public DateTime DateTime { get; set; }
+    public Optional<DateTime?> OptionalNullableDateTime { get; set; }
+    
+    public Optional<DateTime> OptionalDateTime { get; set; }
+    
+    public DateTime? NullableDateTime { get; set; }
+    
+    public DateTime DateTime { get; set; }
 }
