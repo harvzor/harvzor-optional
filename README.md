@@ -157,6 +157,7 @@ Instead we want SwaggerGen to treat `Optional<T>` as the generic type `T`. To ha
 services
     .AddSwaggerGen(options =>
     {
+        // The assembly you pass in should include your controllers and perhaps even your DTOs.
         options.FixOptionalMappings(Assembly.GetExecutingAssembly());
     });
 ```
