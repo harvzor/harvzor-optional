@@ -131,6 +131,8 @@ services
     });
 ```
 
+### Swagger support
+
 #### Harvzor.Optional.Swashbuckle
 
 > **Warning**
@@ -187,7 +189,7 @@ This package could be improved if these issues are ever resolved:
 - https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/1810
 - https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2359
 
-#### Alternative Swagger support
+#### Manual Swagger support
 
 If you're using Swashbuckle SwaggerGen but don't want to use `Harvzor.Optional.Swashbuckle`, you can also manually tell it how your types should look. Here are some basic types mapped:
 
