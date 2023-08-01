@@ -2,9 +2,11 @@
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
+        <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+        <RootNamespace>Harvzor.Optional.NewtonsoftJson.WebExample</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
