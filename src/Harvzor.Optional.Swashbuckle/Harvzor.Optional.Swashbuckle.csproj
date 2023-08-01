@@ -2,14 +2,16 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+        <IsPackable>true</IsPackable>
+        <PackageId>Harvzor.Optional.Swashbuckle</PackageId>
         <Authors>@harvzor</Authors>
         <PackageProjectUrl>https://github.com/harvzor/harvzor-optional</PackageProjectUrl>
         <RepositoryUrl>https://github.com/harvzor/harvzor-optional</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <Company>@harvzor</Company>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <LangVersion>11</LangVersion>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,6 +20,14 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Harvzor.Optional\Harvzor.Optional.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\..\README.md">
+        <Pack>true</Pack>
+        <PackagePath>\</PackagePath>
+        <Link>README.md</Link>
+      </None>
     </ItemGroup>
 
 </Project>
