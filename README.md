@@ -183,6 +183,10 @@ options.MapType<Optional<Version>>(() => new OpenApiSchema()
 options.FixOptionalMappings(Assembly.GetExecutingAssembly());
 ```
 
+##### Known caveats
+
+- this does not work with minimal APIs as it searches for `Optional<T>` references on parameters and properties of any classes that implement controller methods, and then maps those `Optional<T>` types to their generic type `T`
+
 ##### Improvements
 
 This package could be improved if these issues are ever resolved:

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
         options.FixOptionalMappings(Assembly.GetExecutingAssembly());

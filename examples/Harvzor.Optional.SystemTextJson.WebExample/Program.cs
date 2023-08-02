@@ -9,7 +9,6 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
         options.MapType<Optional<Version>>(() => new OpenApiSchema()
@@ -54,22 +53,22 @@ public class IndexController : Controller
         return "Hello World!";
     }
     
-    // [HttpPost]
-    // public Optional<Foo> Post(Optional<Foo> foo)
-    // {
-    //     return foo;
-    // }
-    
     [HttpPost]
-    public Foo Post(Foo foo)
+    public Optional<Foo> Post(Optional<Foo> foo)
     {
         return foo;
     }
+    //
+    // [HttpPost]
+    // public Foo Post(Foo foo)
+    // {
+    //     return foo;
+    // }
 }
 
-public record Foo : Bar
+public record Foo
 {
-    // public Optional<Bar> OptionalBar { get; set; }
+    public Optional<Bar> OptionalBar { get; set; }
     
     // public Bar Bar { get; set; }
 }
@@ -85,11 +84,11 @@ public record Bar
     //
     // public Optional<int?> OptionalNullableInt { get; set; }
     //
-    // public Optional<int> OptionalInt { get; set; }
+    public Optional<int> OptionalInt { get; set; }
     //
     // public int? NullableInt { get; set; }
     //
-    // public int Int { get; set; }
+    public int Int { get; set; }
     //
     // public Optional<DateTime?> OptionalNullableDateTime { get; set; }
     //
@@ -104,8 +103,8 @@ public record Bar
     // public Optional<int[]> OptionalIntArray { get; set; }
     //
     // public int[] IntArray { get; set; } = { };
-    
-    public Optional<int[][]> OptionalIntArrayArray { get; set; }
-
-    public int[][] IntArrayArray { get; set; }
+    //
+    // public Optional<int[][]> OptionalIntArrayArray { get; set; }
+    //
+    // public int[][] IntArrayArray { get; set; }
 }

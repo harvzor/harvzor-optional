@@ -11,8 +11,31 @@ namespace Harvzor.Optional.Swashbuckle;
 
 public static class OptionalSwashbuckle
 {
+    /// <summary>
+    /// Remaps a <see cref="Optional{T}"/> to its T argument, and also ensures that the T argument is in the schema repo.
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="types">Should be of type <see cref="Optional{T}"/>.</param>
     private static void RemapOptionalObject(this SwaggerGenOptions options, params Type[] types)
     {
+        // Create OptionalDocumentFilter<T>.
+        Type CreateGenericOptionalDocumentFilter(Type argumentType)
+        {
+            Type optionalDocumentFilterType = typeof(OptionalDocumentFilter<>);
+            return optionalDocumentFilterType.MakeGenericType(argumentType);
+        }
+        
+        // Invoke `options.DocumentFilter<OptionalDocumentFilter<T>>()` but with `genericType` instead of `<T>`;
+        void InvokeDocumentFilter(Type genericOptionalDocumentFilter)
+        {
+            MethodInfo documentFilterMethod = typeof(SwaggerGenOptionsExtensions)
+                .GetMethod(nameof(SwaggerGenOptionsExtensions.DocumentFilter))!;
+
+            MethodInfo genericDocumentFilterMethod = documentFilterMethod.MakeGenericMethod(genericOptionalDocumentFilter);
+
+            genericDocumentFilterMethod.Invoke(null, new object?[] { options, Array.Empty<object>() });
+        }
+
         foreach (Type type in types)
         {
             Type argumentType = type.GetGenericArguments().First();
@@ -36,28 +59,16 @@ public static class OptionalSwashbuckle
             }
             catch (Exception)
             {
-                // todo: find a nicer way to deal with types being added multiple times (somehow look through schema repo?)
+                // todo: maybe catch can be removed if options.SchemaGeneratorOptions.CustomTypeMappings is checked?
+                // probably can't generate schemas that way though as there's no access to schema generator
+
+                // If the same type is attempted to be mapped twice, the second attempt will be caught here.
+                // There doesn't appear to be a way to check which schemas have already been mapped.
             }
 
             // This should do the same as `options.DocumentFilter<OptionalDocumentFilter<T>>();`
-            {
-                Type? genericType;
-                // Create OptionalDocumentFilter<T>.
-                {
-                    Type optionalDocumentFilterType = typeof(OptionalDocumentFilter<>);
-                    genericType = optionalDocumentFilterType.MakeGenericType(argumentType);
-                }
-
-                // Invoke `options.DocumentFilter<OptionalDocumentFilter<T>>()` but with `genericType` instead of `<T>`;
-                {
-                    MethodInfo documentFilterMethod = typeof(SwaggerGenOptionsExtensions)
-                        .GetMethod(nameof(SwaggerGenOptionsExtensions.DocumentFilter))!;
-
-                    MethodInfo genericDocumentFilterMethod = documentFilterMethod.MakeGenericMethod(genericType);
-
-                    genericDocumentFilterMethod.Invoke(null, new object?[] { options, Array.Empty<object>() });
-                }
-            }
+            Type genericType = CreateGenericOptionalDocumentFilter(argumentType);
+            InvokeDocumentFilter(genericType);
         }
     }
     
@@ -65,28 +76,55 @@ public static class OptionalSwashbuckle
     {
         Type openGenericOptionalType = typeof(Optional<>);
         
+        // Recursively find all the Optional<T> properties on the given type.
+        IEnumerable<Type> WalkPropertiesAndFindOptionalProperties(Type type)
+        {
+            var nonOptionalType = type.IsGenericType && type.GetGenericTypeDefinition() == openGenericOptionalType
+                ? type.GetGenericArguments().First()
+                : type;
+            
+            Type[] propertyTypes = nonOptionalType
+                .GetProperties()
+                .Select(property => property.PropertyType)
+                .ToArray();
+
+            foreach (Type propertyType in propertyTypes)
+            {
+                foreach (Type item in WalkPropertiesAndFindOptionalProperties(propertyType))
+                    yield return item;
+
+                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == openGenericOptionalType)
+                    yield return propertyType;
+            }
+        }
+        
         // Find any Optional<T>'s.
-        IEnumerable<Type> typesUsingOptional = assembly.GetTypes()
-            // todo: also check fields?
+        IEnumerable<Type> typesUsingOptional = assembly
+            .GetTypes()
+            .Where(type => type.IsSubclassOf(typeof(Microsoft.AspNetCore.Mvc.ControllerBase)))
             .SelectMany(assemblyType =>
             {
-                IEnumerable<Type> optionalProperties = assemblyType.GetProperties()
-                    .Select(x => x.PropertyType)
-                    .Where(propertyType => propertyType.IsGenericType
-                                           && propertyType.GetGenericTypeDefinition() == openGenericOptionalType
-                    );
-
-                // todo: this doesn't work with a minimal API like:
-                // app.MapPost("/", (Optional<Foo> foo) => foo);
-                // as it doesn't look like Optional<Foo> is defined in the assembly?
-                IEnumerable<Type> optionalParameters = assemblyType
-                    .GetMethods( /*BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static*/)
+                // Find parameters on controller methods like `Foo foo` on `public Foo Post(Foo foo)`:
+                Type[] parameters = assemblyType
+                    // This doesn't work with a minimal API like:
+                    // `app.MapPost("/", (Optional<Foo> foo) => foo);`
+                    // as it doesn't look like Optional<Foo> is defined in the assembly?
+                    .GetMethods()
+                    .Where(m => m.DeclaringType == assemblyType)
                     .SelectMany(method => method.GetParameters().Select(x => x.ParameterType))
+                    .ToArray();
+                
+                // todo: also find optional return types
+                
+                Type[] optionalParameters = parameters
                     .Where(parameterType => parameterType.IsGenericType
-                                            && parameterType.GetGenericTypeDefinition() == openGenericOptionalType
-                    );
+                        && parameterType.GetGenericTypeDefinition() == openGenericOptionalType
+                    )
+                    .ToArray();
 
-                return optionalProperties.Concat(optionalParameters);
+                IEnumerable<Type> optionalPropertyTypes = parameters.SelectMany(WalkPropertiesAndFindOptionalProperties);
+
+                return optionalParameters.Concat(optionalPropertyTypes);
             })
             .Distinct();
         
@@ -116,7 +154,7 @@ public static class OptionalSwashbuckle
             {
                 Type = argumentOpenApiType,
                 Format = argumentFormat,
-                // todo: can return true, but doesn't do anything? worked if same code is used with Deprecated
+                // todo: create example project showing Nullable doesn't seem to work
                 Nullable = argumentType.IsReferenceOrNullableType() // Should catch `string` and `int?`.
                     // || (
                     //     argumentType.IsGenericType
@@ -143,8 +181,7 @@ public static class OptionalSwashbuckle
         }
         else
         {
-            // todo: don't throw?
-            throw new Exception("unexpected type");
+            throw new ArgumentException("Expected argument to be of type IEnumerable.", nameof(argumentType));
         }
         
         GetTypeAndFormat(arrayType, out string arrayStringType, out string? arrayFormat);
@@ -155,31 +192,20 @@ public static class OptionalSwashbuckle
             return new OpenApiSchema
             {
                 Type = "array",
-                // todo: not sure if it should be nullable
-                Nullable = true,
                 Items = GetSchemaOfArray(arrayType)
             };
         }
-        else
-        {
-            return new OpenApiSchema
-            {
-                Type = "array",
-                // todo: not sure if it should be nullable
-                Nullable = true,
-                Items = new OpenApiSchema()
-                {
-                    Type = arrayStringType,
-                    Format = arrayFormat
-                }
-            };
-        }
 
-        // // If it's a multidimensional array...
-        // if (typeof(IEnumerable).IsAssignableFrom(argumentType))
-        // {
-        //     
-        // }
+        return new OpenApiSchema
+        {
+            Type = "array",
+            Items = new OpenApiSchema()
+            {
+                Type = arrayStringType,
+                Format = arrayFormat,
+                Nullable = arrayType.IsReferenceOrNullableType()
+            }
+        };
     }
 
     private static void GetTypeAndFormat(Type argumentType, out string argumentOpenApiType, out string? argumentFormat)
@@ -214,10 +240,16 @@ public static class OptionalSwashbuckle
         {
             argumentOpenApiType = "boolean";
         }
+        // todo: validate DateTime works like this
         else if (argumentType == typeof(DateTime) || argumentType == typeof(DateTime?))
         {
             argumentOpenApiType = "string";
             argumentFormat = "date-time";
+        }
+        // todo: validate TimeSpan works like this
+        else if (argumentType == typeof(TimeSpan) || argumentType == typeof(TimeSpan?))
+        {
+            argumentOpenApiType = "string";
         }
         // Not supported in netstandard:
         // else if (argumentType == typeof(DateOnly) || argumentType == typeof(DateOnly?))
@@ -230,7 +262,6 @@ public static class OptionalSwashbuckle
         {
             argumentOpenApiType = "array";
         }
-        // todo: provide docs on how to manage other types? or is it better to try to map simple types without this hack?
         else
         {
             argumentOpenApiType = "object";
@@ -265,75 +296,3 @@ public static class OptionalSwashbuckle
             options.FixMappingsForUsedOptionalsInAssembly(assembly);
     }
 }
-
-// /// <summary>
-// /// Ensures that <see cref="Optional{T}"/> is correctly displayed in the API Schema in Swagger.
-// /// </summary>
-// /// <remarks>
-// /// https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2359#issuecomment-1114008607
-// /// </remarks>
-// public class OptionalSchemaFilter : ISchemaFilter
-// {
-//     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
-//     {
-//         if (context.Type.IsGenericType && context.Type.GetGenericTypeDefinition() == typeof(Optional<>))
-//         {
-//             Type itemType = context.Type.GetGenericArguments()[0];
-//             OpenApiSchema? genericPartType = context.SchemaGenerator.GenerateSchema(itemType, context.SchemaRepository);
-//         
-//             // If `Type` is null, it's property a user defined class.
-//             if (genericPartType.Type == null)
-//             {
-//                 // schema.Reference = new OpenApiReference
-//                 // {
-//                 //     Id = "#/components/schemas/" + itemType.Name,
-//                 // };
-//                 // schema.Type = null;
-//                 // schema.Properties.Clear();
-//             }
-//             else
-//             {
-//                 schema.Type = genericPartType.Type;
-//                 schema.Properties.Clear();
-//                 
-//                 return;
-//             }
-//         }
-//
-//         if (context.Type.GetProperties().Any(p =>
-//                 p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(Optional<>)))
-//         {
-//             foreach (var property in schema.Properties)
-//             {
-//                 PropertyInfo? propertyInfo = context.Type.GetProperties()
-//                     .FirstOrDefault(x => x.Name.Equals(property.Key, StringComparison.OrdinalIgnoreCase));
-//
-//                 if (propertyInfo != null
-//                     && propertyInfo.PropertyType.IsGenericType
-//                     && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Optional<>))
-//                 {
-//                     // context.SchemaRepository.Schemas.Remove(property.Value.Reference.Id);
-//                     
-//                     Type propertyType = propertyInfo.PropertyType.GetGenericArguments()[0];
-//                     OpenApiSchema? propertyGenericPartType = context.SchemaGenerator.GenerateSchema(propertyType, context.SchemaRepository);
-//
-//                     // If `Type` is null, it's property a user defined class.
-//                     // The property.Value.Reference should then be defined.
-//                     if (propertyGenericPartType.Type == null)
-//                     {
-//                         // // It's set to string if `options.MapType(typeof(Optional<>), () => new OpenApiSchema { Type = "string" } );` is used.
-//                         property.Value.Type = null;
-//                         property.Value.Reference = propertyGenericPartType.Reference;
-//                     }
-//                     else
-//                     {
-//                         property.Value.Type = propertyGenericPartType.Type;
-//                         property.Value.Properties.Clear();
-//                         property.Value.Reference = null;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
-//
