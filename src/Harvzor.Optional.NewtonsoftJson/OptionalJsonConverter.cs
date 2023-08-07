@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Linq;
 using Newtonsoft.Json;
-
-// Missing XML comment for publicly visible type or member
-#pragma warning disable CS1591
 
 namespace Harvzor.Optional.NewtonsoftJson;
 
 /// <summary>
 /// Register this customer Newtonsoft converter to get JSON support of <see cref="Optional{T}"/>. Docs: https://www.newtonsoft.com/json/help/html/CustomJsonConverter.htm
 /// <br/><br/>
-/// This converter ensures that the actual value is read and written correctly, but cannot effect how / if the property
+/// This converter ensures that the actual value is read and written correctly, but cannot affect how / if the property
 /// name is serialized (the <see cref="OptionalShouldSerializeContractResolver"/> can do that).
 /// </summary>
 /// <remarks>
@@ -19,6 +15,7 @@ namespace Harvzor.Optional.NewtonsoftJson;
 /// </remarks>
 public class OptionalJsonConverter : JsonConverter
 {
+    /// <inheritdoc />
     public override bool CanConvert(Type objectType)
     {
         return IsOptional(objectType);
@@ -29,6 +26,7 @@ public class OptionalJsonConverter : JsonConverter
         return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Optional<>);
     }
 
+    /// <inheritdoc />
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
         var optionalInstance = Activator.CreateInstance(objectType);
@@ -39,6 +37,7 @@ public class OptionalJsonConverter : JsonConverter
         return optionalInstance;
     }
 
+    /// <inheritdoc />
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
         var optionalType = value.GetType();
