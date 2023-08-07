@@ -111,10 +111,13 @@ public static class OptionalSwashbuckle
                     // as it doesn't look like Optional<Foo> is defined in the assembly?
                     .GetMethods()
                     .Where(m => m.DeclaringType == assemblyType)
-                    .SelectMany(method => method.GetParameters().Select(x => x.ParameterType))
+                    .SelectMany(method => method
+                        .GetParameters()
+                        .Select(x => x.ParameterType)
+                        // todo: could also be IActionResult, consumer of this should be able to specify what types there are
+                        .Concat(new []{method.ReturnType })
+                    )
                     .ToArray();
-                
-                // todo: also find optional return types
                 
                 Type[] optionalParameters = parameters
                     .Where(parameterType => parameterType.IsGenericType
