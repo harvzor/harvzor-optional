@@ -18,7 +18,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
                 new OptionalJsonConverter(),
             },
             // Isn't needed as the contract resolver only effects writing:
-            // ContractResolver = new OptionalShouldSerializeContractResolver(),
+            // ContractResolver = new IgnoreUndefinedOptionalsContractResolver(),
         })!;
     }
 
@@ -32,7 +32,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
             {
                 new OptionalJsonConverter(),
             },
-            ContractResolver = new OptionalShouldSerializeContractResolver(),
+            ContractResolver = new IgnoreUndefinedOptionalsContractResolver(),
         })!;
     }
     
@@ -163,7 +163,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     /// there's a better way of compositing resolvers here:
     /// https://stackoverflow.com/questions/39612636/add-multiple-contract-resolver-in-newtonsoft-json
     /// </remarks>
-    private class DateTimeMixedWithOptionalContractResolver : OptionalShouldSerializeContractResolver
+    private class DateTimeMixedWithOptionalContractResolver : IgnoreUndefinedOptionalsContractResolver
     {
         protected override JsonContract CreateContract(Type objectType)
         {
