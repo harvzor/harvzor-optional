@@ -126,7 +126,8 @@ services
 services
     .AddNewtonsoftJson(options =>
     {
-        options.SerializerSettings.Converters.Add(new Harvzor.Optional.NewtonsoftJson.OptionalJsonConverter());
+        options.SerializerSettings.Converters.Add(new OptionalJsonConverter());
+        options.SerializerSettings.ContractResolver = new OptionalShouldSerializeContractResolver();
     });
 ```
 
