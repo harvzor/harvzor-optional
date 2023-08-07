@@ -102,7 +102,7 @@ public static class OptionalSwashbuckle
         // Find any Optional<T>'s.
         IEnumerable<Type> typesUsingOptional = assembly
             .GetTypes()
-            .Where(type => type.IsSubclassOf(typeof(Microsoft.AspNetCore.Mvc.ControllerBase)))
+            .Where(type => type.IsSubclassOf(typeof(ControllerBase)))
             .SelectMany(assemblyType =>
             {
                 // Find parameters on controller methods like `Foo foo` on `public Foo Post(Foo foo)`:
@@ -148,11 +148,26 @@ public static class OptionalSwashbuckle
         
         // Fix the mappings for Optional<T>'s:
         foreach (Type typeUsingOptional in typesUsingOptional)
-            options.MapType(typeUsingOptional);
+            options.FixOptionalMappingForType(typeUsingOptional);
     }
 
-    private static void MapType(this SwaggerGenOptions options, Type typeUsingOptional)
+    /// <inheritdoc cref="FixOptionalMappingForType"/>
+    public static SwaggerGenOptions FixOptionalMappingForType<T>(this SwaggerGenOptions options)
     {
+        return options.FixOptionalMappingForType(typeof(T));
+    }
+
+    /// <summary>
+    /// Fix the mapping for a <see cref="Optional{T}"/> type.
+    /// </summary>
+    /// <param name="options">Swagger options you get access to when calling `services.AddSwaggerGen(options => {});`.</param>
+    /// <param name="typeUsingOptional">Pass in a <see cref="Optional{T}"/> type.</param>
+    /// <returns></returns>
+    public static SwaggerGenOptions FixOptionalMappingForType(this SwaggerGenOptions options, Type typeUsingOptional)
+    {
+        if (!typeUsingOptional.IsGenericType || typeUsingOptional.GetGenericTypeDefinition() != typeof(Optional<>))
+            throw new ArgumentException("Type must be Optional<T>.", nameof(typeUsingOptional));
+        
         Type argumentType = typeUsingOptional.GetGenericArguments().First();
         
         GetTypeAndFormat(argumentType, out string argumentOpenApiType, out string? argumentFormat);
@@ -180,6 +195,8 @@ public static class OptionalSwashbuckle
                     // ),
             });
         }
+
+        return options;
     }
 
     private static OpenApiSchema GetSchemaOfArray(Type argumentType)
@@ -308,9 +325,11 @@ public static class OptionalSwashbuckle
     /// Pass in any assemblies that contain your controllers or DTOs to ensure that <see cref="Optional{T}"/> is
     /// correctly mapped.
     /// </param>
-    public static void FixOptionalMappings(this SwaggerGenOptions options, params Assembly[] assemblies)
+    public static SwaggerGenOptions FixOptionalMappings(this SwaggerGenOptions options, params Assembly[] assemblies)
     {
         foreach (Assembly assembly in assemblies)
             options.FixMappingsForUsedOptionalsInAssembly(assembly);
+
+        return options;
     }
 }

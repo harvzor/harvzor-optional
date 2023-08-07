@@ -17,6 +17,10 @@ builder.Services
         });
         
         options.FixOptionalMappings(Assembly.GetExecutingAssembly());
+        // options
+        //     .FixOptionalMappingForType<Optional<Foo>>()
+        //     .FixOptionalMappingForType<Optional<Bar>>()
+        //     .FixOptionalMappingForType<Optional<int>>();
     });
 
 builder.Services
@@ -54,9 +58,10 @@ public class IndexController : Controller
     }
     
     [HttpPost]
-    public Optional<Foo> Post(Optional<Foo> foo)
+    [ProducesResponseType(typeof(Optional<Foo>), 200)]
+    public IActionResult Post(Foo foo)
     {
-        return foo;
+        return Ok(new Optional<Foo>());
     }
     //
     // [HttpPost]
@@ -108,3 +113,6 @@ public record Bar
     //
     // public int[][] IntArrayArray { get; set; }
 }
+
+// todo: test https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v6.5.0/test/Swashbuckle.AspNetCore.IntegrationTests/DocumentProviderTests.cs
+// https://stackoverflow.com/questions/62996494/unit-testing-that-the-swagger-doc-is-correct-without-starting-a-server

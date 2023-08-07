@@ -124,6 +124,8 @@ services
 #### Harvzor.Optional.NewtonsoftJson
 
 ```csharp
+using Harvzor.Optional.Swashbuckle;
+
 services
     .AddNewtonsoftJson(options =>
     {
@@ -154,6 +156,8 @@ This ends up being generated like:
 Instead we want SwaggerGen to treat `Optional<T>` as the generic type `T`. To handle doing this, add this:
 
 ```csharp
+using Harvzor.Optional.Swashbuckle;
+
 services
     .AddSwaggerGen(options =>
     {
@@ -174,6 +178,8 @@ This will:
 This doesn't work in all cases though, for example, with `Optional<Version>`, we want it to be treated as a `string` type and not as a `Version`, so this must be added:
 
 ```csharp
+using Harvzor.Optional.Swashbuckle;
+
 // Add your custom mappings first:
 options.MapType<Optional<Version>>(() => new OpenApiSchema()
 {
@@ -181,6 +187,17 @@ options.MapType<Optional<Version>>(() => new OpenApiSchema()
 });
 
 options.FixOptionalMappings(Assembly.GetExecutingAssembly());
+```
+
+Alternatively, if you don't want to call `FixOptionalMappings(params Assembly[] assemblies)` which automagically finds any references to `Optional<T>` in your assembly, you can just directly feed it `Optional<T>` types that you know are used in your controllers:
+
+```csharp
+using Harvzor.Optional.Swashbuckle;
+
+options
+    .FixOptionalMappingForType<Optional<Foo>>()
+    .FixOptionalMappingForType<Optional<Bar>>()
+    .FixOptionalMappingForType<Optional<int>>();
 ```
 
 ##### Known caveats
@@ -196,7 +213,7 @@ This package could be improved if these issues are ever resolved:
 
 #### Manual Swagger support
 
-If you're using Swashbuckle SwaggerGen but don't want to use `Harvzor.Optional.Swashbuckle`, you can also manually tell it how your types should look. Here are some basic types mapped:
+If you're using `Swashbuckle.AspNetCore.SwaggerGen` but don't want to use `Harvzor.Optional.Swashbuckle`, you can also manually tell it how your types should look. Here are some basic types mapped:
 
 ```csharp
 services.AddSwaggerGen(options =>
