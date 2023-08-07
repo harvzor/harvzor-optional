@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -111,12 +112,26 @@ public static class OptionalSwashbuckle
                     // as it doesn't look like Optional<Foo> is defined in the assembly?
                     .GetMethods()
                     .Where(m => m.DeclaringType == assemblyType)
-                    .SelectMany(method => method
-                        .GetParameters()
-                        .Select(x => x.ParameterType)
-                        // todo: could also be IActionResult, consumer of this should be able to specify what types there are
-                        .Concat(new []{method.ReturnType })
-                    )
+                    .SelectMany(method =>
+                    {
+                        // Find parameters.
+                        var returnTypes = method
+                            .GetParameters()
+                            .Select(x => x.ParameterType);
+                        
+                        // Find return type according to Swashbuckle attributes.
+                        IEnumerable<ProducesResponseTypeAttribute> producesResponseTypeAttribute = method
+                            .GetCustomAttributes<ProducesResponseTypeAttribute>()
+                            .ToArray();
+
+                        if (producesResponseTypeAttribute.Any())
+                            returnTypes = returnTypes.Concat(producesResponseTypeAttribute.Select(x => x.Type));
+
+                        return returnTypes
+                            // todo: could also be IActionResult, consumer of this should be able to specify what types there are
+                            // Use return type:
+                            .Concat(new[] { method.ReturnType });
+                    })
                     .ToArray();
                 
                 Type[] optionalParameters = parameters
