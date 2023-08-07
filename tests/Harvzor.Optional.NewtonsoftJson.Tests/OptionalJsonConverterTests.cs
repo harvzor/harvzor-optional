@@ -1,5 +1,7 @@
 using Harvzor.Optional.JsonConverter.BaseTests;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 namespace Harvzor.Optional.NewtonsoftJson.Tests;
 
@@ -15,6 +17,8 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
             {
                 new OptionalJsonConverter(),
             },
+            // Isn't needed as the contract resolver only effects writing:
+            // ContractResolver = new OptionalShouldSerializeContractResolver(),
         })!;
     }
 
@@ -28,6 +32,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
             {
                 new OptionalJsonConverter(),
             },
+            ContractResolver = new OptionalShouldSerializeContractResolver(),
         })!;
     }
     
@@ -84,7 +89,7 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     }
     
     [Fact]
-    [Trait("Category","Works With Other Custom Converter")]
+    [Trait("Category","Integrates With Other Converters / Contract Resolvers")]
     public void WriteJson_ShouldWriteValue_WhenOptionalPropertyInObjectIsDefinedAndThereIsAnotherConverter()
     {
         // Arrange
@@ -103,12 +108,74 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
 
         json.ShouldBe("{\"OptionalProperty\":\"some value\",\"VersionProperty\":\"1.2.3\"}");
     }
-    
+
     private class ClassWithOptionalPropertyAndVersionConverter
     {
         public Optional<string> OptionalProperty { get; set; }
         
         [JsonConverter(typeof(VersionConverter))]
         public Version VersionProperty { get; set; }
+    }
+    
+    [Fact]
+    [Trait("Category","Integrates With Other Converters / Contract Resolvers")]
+    public void WriteJson_ShouldWriteValue_WhenMultipleContractResolversAreUsed()
+    {
+        // Arrange
+
+        ClassWithOptionalPropertyAndDateTime classWithOptionalPropertyAndDateTime = new ClassWithOptionalPropertyAndDateTime
+        {
+            OptionalProperty = new DateTime(2023, 01, 01),
+            OptionalPropertyTwo = new Optional<DateTime>(),
+            DateTime = new DateTime(2022, 01, 01),
+        };
+
+        // Act
+        
+        string json = JsonConvert.SerializeObject(classWithOptionalPropertyAndDateTime, new JsonSerializerSettings()
+        {
+            Converters = new List<Newtonsoft.Json.JsonConverter>
+            {
+                new OptionalJsonConverter(),
+            },
+            ContractResolver = new DateTimeMixedWithOptionalContractResolver(),
+        });
+
+        // Assert
+
+        json.ShouldBe("{\"OptionalProperty\":new Date(1672527600000),\"DateTime\":new Date(1640991600000)}");
+    }
+    
+    private class ClassWithOptionalPropertyAndDateTime
+    {
+        public Optional<DateTime> OptionalProperty { get; set; }
+        
+        public Optional<DateTime> OptionalPropertyTwo { get; set; }
+        
+        public DateTime DateTime { get; set; }
+    }
+    
+    /// <summary>
+    /// https://www.newtonsoft.com/json/help/html/contractresolver.htm
+    /// </summary>
+    /// <remarks>
+    /// This method (of inheriting from other resolvers) doesn't allow you to use a built in contract resolvers, maybe
+    /// there's a better way of compositing resolvers here:
+    /// https://stackoverflow.com/questions/39612636/add-multiple-contract-resolver-in-newtonsoft-json
+    /// </remarks>
+    private class DateTimeMixedWithOptionalContractResolver : OptionalShouldSerializeContractResolver
+    {
+        protected override JsonContract CreateContract(Type objectType)
+        {
+            JsonContract contract = base.CreateContract(objectType);
+
+            // this will only be called once and then cached
+            if (objectType == typeof(DateTime) || objectType == typeof(DateTimeOffset))
+            {
+                contract.Converter = new JavaScriptDateTimeConverter();
+            }
+
+            return contract;
+        }
     }
 }

@@ -1,7 +1,8 @@
 using System.Reflection;
 using Harvzor.Optional;
-using Harvzor.Optional.Swashbuckle;
+using Harvzor.Optional.NewtonsoftJson;
 using Microsoft.AspNetCore.Mvc;
+using Harvzor.Optional.Swashbuckle;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,8 @@ builder.Services
     .AddSwaggerGen(options =>
     {
         options.FixOptionalMappings(Assembly.GetExecutingAssembly());
-    });
+    })
+    .AddSwaggerGenNewtonsoftSupport();
 
 builder.Services
     .AddControllers()
@@ -17,7 +19,8 @@ builder.Services
     // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-7.0#configure-json-deserialization-options-for-body-binding
     .AddNewtonsoftJson(options =>
     {
-        options.SerializerSettings.Converters.Add(new Harvzor.Optional.NewtonsoftJson.OptionalJsonConverter());
+        options.SerializerSettings.Converters.Add(new OptionalJsonConverter());
+        options.SerializerSettings.ContractResolver = new OptionalShouldSerializeContractResolver();
     });
 
 var app = builder.Build();

@@ -5,7 +5,14 @@ using Newtonsoft.Json;
 // The JSON would normally come from some external data source:
 string json = "{\"DefinedProperty\":\"Bar\"}";
 
-Foo foo = JsonConvert.DeserializeObject<Foo>(json, new OptionalJsonConverter());
+Foo foo = JsonConvert.DeserializeObject<Foo>(json, new JsonSerializerSettings()
+{
+    Converters = new List<JsonConverter>
+    {
+        new OptionalJsonConverter(),
+    },
+    ContractResolver = new OptionalShouldSerializeContractResolver(),
+});
 
 Console.WriteLine(foo.DefinedProperty.IsDefined); // True
 Console.WriteLine(foo.UndefinedProperty.IsDefined); // False
