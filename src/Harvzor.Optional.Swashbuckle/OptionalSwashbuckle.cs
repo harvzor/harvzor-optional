@@ -46,31 +46,24 @@ public static class OptionalSwashbuckle
             
             if (isNullable)
                 genericType = genericType.GetGenericArguments().First();
-            
-            try
-            {
-                // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other
-                // types like Optional<int> are (even if they've been mapped!).
-                options.MapType(optionalType, () => new OpenApiSchema
-                {
-                    Type = "object",
-                    // Seems that Swagger doesn't mark references as nullable ever?
-                    // Nullable = isNullable,
-                    Reference = new OpenApiReference
-                    {
-                        Id = genericType.Name,
-                        Type = ReferenceType.Schema,
-                    }
-                });
-            }
-            catch (Exception)
-            {
-                // todo: maybe catch can be removed if options.SchemaGeneratorOptions.CustomTypeMappings is checked?
-                // probably can't generate schemas that way though as there's no access to schema generator
 
-                // If the same type is attempted to be mapped twice, the second attempt will be caught here.
-                // There doesn't appear to be a way to check which schemas have already been mapped.
-            }
+            // Ensure the same type isn't mapped twice somehow otherwise `options.MapType` will throw.
+            if (options.SchemaGeneratorOptions.CustomTypeMappings.Any(x => x.Key == optionalType))
+                continue;
+            
+            // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other
+            // types like Optional<int> are (even if they've been mapped!).
+            options.MapType(optionalType, () => new OpenApiSchema
+            {
+                Type = "object",
+                // Seems that Swagger doesn't mark references as nullable ever?
+                // Nullable = isNullable,
+                Reference = new OpenApiReference
+                {
+                    Id = genericType.Name,
+                    Type = ReferenceType.Schema,
+                }
+            });
 
             // This should do the same as `options.DocumentFilter<OptionalDocumentFilter<T>>();`
             Type genericDocumentFilterType = CreateGenericOptionalDocumentFilter(genericType);
