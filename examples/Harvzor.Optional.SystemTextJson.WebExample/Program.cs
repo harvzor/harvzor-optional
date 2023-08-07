@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddSwaggerGen(options =>
     {
-        options.MapType<Optional<Version>>(() => new OpenApiSchema()
+        options.MapType<Optional<Version>>(() => new OpenApiSchema
         {
             Type = "string"
         });
@@ -89,11 +89,11 @@ public record Bar
     //
     // public Optional<int?> OptionalNullableInt { get; set; }
     //
-    public Optional<int> OptionalInt { get; set; }
+    // public Optional<int> OptionalInt { get; set; }
     //
     // public int? NullableInt { get; set; }
     //
-    public int Int { get; set; }
+    // public int Int { get; set; }
     //
     // public Optional<DateTime?> OptionalNullableDateTime { get; set; }
     //
@@ -102,6 +102,14 @@ public record Bar
     // public DateTime? NullableDateTime { get; set; }
     //
     // public DateTime DateTime { get; set; }
+    //
+    // public Optional<TimeSpan?> OptionalNullableTimeSpan { get; set; }
+    //
+    // public Optional<TimeSpan> OptionalTimeSpan { get; set; }
+    //
+    // public TimeSpan? NullableTimeSpan { get; set; }
+    //
+    // public TimeSpan TimeSpan { get; set; }
     //
     // public Optional<Version> OptionalVersion { get; set; }
     

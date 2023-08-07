@@ -16,8 +16,8 @@ public static class OptionalSwashbuckle
     /// Remaps a <see cref="Optional{T}"/> to its T argument, and also ensures that the T argument is in the schema repo.
     /// </summary>
     /// <param name="options"></param>
-    /// <param name="types">Should be of type <see cref="Optional{T}"/>.</param>
-    private static void RemapOptionalObject(this SwaggerGenOptions options, params Type[] types)
+    /// <param name="optionalTypes">Should be of type <see cref="Optional{T}"/>.</param>
+    private static void RemapOptionalObject(this SwaggerGenOptions options, params Type[] optionalTypes)
     {
         // Create OptionalDocumentFilter<T>.
         Type CreateGenericOptionalDocumentFilter(Type argumentType)
@@ -37,23 +37,28 @@ public static class OptionalSwashbuckle
             genericDocumentFilterMethod.Invoke(null, new object?[] { options, Array.Empty<object>() });
         }
 
-        foreach (Type type in types)
+        foreach (Type optionalType in optionalTypes)
         {
-            Type argumentType = type.GetGenericArguments().First();
+            Type genericType = optionalType.GetGenericArguments().First();
+
+            bool isNullable = genericType.IsGenericType
+                && genericType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            
+            if (isNullable)
+                genericType = genericType.GetGenericArguments().First();
             
             try
             {
                 // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other
                 // types like Optional<int> are (even if they've been mapped!).
-                options.MapType(type, () => new OpenApiSchema
+                options.MapType(optionalType, () => new OpenApiSchema
                 {
                     Type = "object",
                     // Seems that Swagger doesn't mark references as nullable ever?
-                    // Nullable = argumentType.IsGenericType
-                    //     && argumentType.GetGenericTypeDefinition() == typeof(Nullable<>),
+                    // Nullable = isNullable,
                     Reference = new OpenApiReference
                     {
-                        Id = argumentType.Name,
+                        Id = genericType.Name,
                         Type = ReferenceType.Schema,
                     }
                 });
@@ -68,8 +73,8 @@ public static class OptionalSwashbuckle
             }
 
             // This should do the same as `options.DocumentFilter<OptionalDocumentFilter<T>>();`
-            Type genericType = CreateGenericOptionalDocumentFilter(argumentType);
-            InvokeDocumentFilter(genericType);
+            Type genericDocumentFilterType = CreateGenericOptionalDocumentFilter(genericType);
+            InvokeDocumentFilter(genericDocumentFilterType);
         }
     }
     
@@ -80,22 +85,25 @@ public static class OptionalSwashbuckle
         // Recursively find all the Optional<T> properties on the given type.
         IEnumerable<Type> WalkPropertiesAndFindOptionalProperties(Type type)
         {
-            var nonOptionalType = type.IsGenericType && type.GetGenericTypeDefinition() == openGenericOptionalType
+            Type nonOptionalType = type.IsGenericType && type.GetGenericTypeDefinition() == openGenericOptionalType
                 ? type.GetGenericArguments().First()
                 : type;
-            
-            Type[] propertyTypes = nonOptionalType
-                .GetProperties()
-                .Select(property => property.PropertyType)
-                .ToArray();
 
-            foreach (Type propertyType in propertyTypes)
+            if (nonOptionalType.Assembly == assembly)
             {
-                foreach (Type item in WalkPropertiesAndFindOptionalProperties(propertyType))
-                    yield return item;
+                Type[] propertyTypes = nonOptionalType
+                    .GetProperties()
+                    .Select(property => property.PropertyType)
+                    .ToArray();
 
-                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == openGenericOptionalType)
-                    yield return propertyType;
+                foreach (Type propertyType in propertyTypes)
+                {
+                    foreach (Type item in WalkPropertiesAndFindOptionalProperties(propertyType))
+                        yield return item;
+
+                    if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == openGenericOptionalType)
+                        yield return propertyType;
+                }
             }
         }
         
@@ -115,7 +123,7 @@ public static class OptionalSwashbuckle
                     .SelectMany(method =>
                     {
                         // Find parameters.
-                        var returnTypes = method
+                        IEnumerable<Type> types = method
                             .GetParameters()
                             .Select(x => x.ParameterType);
                         
@@ -125,11 +133,10 @@ public static class OptionalSwashbuckle
                             .ToArray();
 
                         if (producesResponseTypeAttribute.Any())
-                            returnTypes = returnTypes.Concat(producesResponseTypeAttribute.Select(x => x.Type));
+                            types = types.Concat(producesResponseTypeAttribute.Select(x => x.Type));
 
-                        return returnTypes
-                            // todo: could also be IActionResult, consumer of this should be able to specify what types there are
-                            // Use return type:
+                        return types
+                            // Find return type:
                             .Concat(new[] { method.ReturnType });
                     })
                     .ToArray();
@@ -162,7 +169,6 @@ public static class OptionalSwashbuckle
     /// </summary>
     /// <param name="options">Swagger options you get access to when calling `services.AddSwaggerGen(options => {});`.</param>
     /// <param name="typeUsingOptional">Pass in a <see cref="Optional{T}"/> type.</param>
-    /// <returns></returns>
     public static SwaggerGenOptions FixOptionalMappingForType(this SwaggerGenOptions options, Type typeUsingOptional)
     {
         if (!typeUsingOptional.IsGenericType || typeUsingOptional.GetGenericTypeDefinition() != typeof(Optional<>))
@@ -275,17 +281,16 @@ public static class OptionalSwashbuckle
         {
             argumentOpenApiType = "boolean";
         }
-        // todo: validate DateTime works like this
         else if (argumentType == typeof(DateTime) || argumentType == typeof(DateTime?))
         {
             argumentOpenApiType = "string";
             argumentFormat = "date-time";
         }
-        // todo: validate TimeSpan works like this
-        else if (argumentType == typeof(TimeSpan) || argumentType == typeof(TimeSpan?))
-        {
-            argumentOpenApiType = "string";
-        }
+        // TimeSpan is treated as the underlying type unless overridden:
+        // else if (argumentType == typeof(TimeSpan) || argumentType == typeof(TimeSpan?))
+        // {
+        //     argumentOpenApiType = "string";
+        // }
         // Not supported in netstandard:
         // else if (argumentType == typeof(DateOnly) || argumentType == typeof(DateOnly?))
         // {
@@ -308,7 +313,7 @@ public static class OptionalSwashbuckle
     /// reference, then has its generic type included in the schema repository.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    private class OptionalDocumentFilter<T> : IDocumentFilter where T : class
+    private class OptionalDocumentFilter<T> : IDocumentFilter
     {
         public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {
@@ -320,7 +325,7 @@ public static class OptionalSwashbuckle
     /// <summary>
     /// Ensures that <see cref="Optional{T}"/> is correctly displayed in the API Schema in Swagger.
     /// </summary>
-    /// <param name="options"></param>
+    /// <param name="options">Swagger options you get access to when calling `services.AddSwaggerGen(options => {});`.</param>
     /// <param name="assemblies">
     /// Pass in any assemblies that contain your controllers or DTOs to ensure that <see cref="Optional{T}"/> is
     /// correctly mapped.
