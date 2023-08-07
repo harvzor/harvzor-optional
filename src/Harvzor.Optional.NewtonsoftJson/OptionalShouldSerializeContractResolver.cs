@@ -12,6 +12,7 @@ namespace Harvzor.Optional.NewtonsoftJson;
 /// </summary>
 public class OptionalShouldSerializeContractResolver : DefaultContractResolver
 {
+    /// <inheritdoc />
     protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
     {
         JsonProperty property = base.CreateProperty(member, memberSerialization);
@@ -21,11 +22,7 @@ public class OptionalShouldSerializeContractResolver : DefaultContractResolver
             property.ShouldSerialize =
                 instance =>
                 {
-                    IMember? propertyOrField = instance.GetType().GetPropertyOrField(property.UnderlyingName);
-
-                    // TODO: improve exception
-                    if (propertyOrField == null)
-                        throw new Exception("Member should surely be found on class?");
+                    IMember propertyOrField = instance.GetType().GetPropertyOrField(property.UnderlyingName)!;
 
                     IOptional optional = (IOptional)propertyOrField.GetValue(instance);
                     return optional.IsDefined;
