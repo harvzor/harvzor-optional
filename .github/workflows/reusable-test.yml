@@ -17,6 +17,8 @@ jobs:
       - name: Get Codecov env
         run: ci_env=`bash <(curl -s https://codecov.io/env)`
       - name: Upload coverage reports to Codecov
-        run: docker-compose run $ci_env -e CI=true codecov-uploader $CODECOV_TOKEN
+        run: |
+          echo $CODECOV_TOKEN
+          docker-compose run $ci_env -e CI=true codecov-uploader $CODECOV_TOKEN
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
