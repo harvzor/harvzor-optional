@@ -14,7 +14,7 @@ ENTRYPOINT ["dotnet", "test", "-c", "Release", "--no-restore", "--no-build", "/p
 
 FROM build as codecov-uploader
 
-RUN dotnet test -c Release --no-restore --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+RUN dotnet test -c Release --no-restore --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Exclude="[*Tests]*"
 
 RUN curl -Os https://uploader.codecov.io/latest/linux/codecov
 
