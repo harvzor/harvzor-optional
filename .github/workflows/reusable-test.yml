@@ -23,4 +23,4 @@ jobs:
           docker-compose run $ci_env -e CI=true codecov-uploader $CODECOV_TOKEN
         env:
           ci_env: ${{ steps.get-codecov-env.outputs.ci_env }}
-          CODECOV_TOKEN: asd
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
