@@ -16,3 +16,9 @@ services:
       context: .
       dockerfile: ./Dockerfile
       target: test
+  # Run with: `docker-compose run codecov-uploader {codecov-token}`
+  codecov-uploader:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: codecov-uploader

@@ -7,8 +7,16 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Build docker image
+        run: docker-compose build test
+      - name: Run tests in docker image
         run: docker-compose run test
+      - name: Get Codecov env
+        run: ci_env=`bash <(curl -s https://codecov.io/env)`
+      - name: Upload coverage reports to Codecov
+        run: docker-compose run $ci_env -e CI=true codecov-uploader $CODECOV_TOKEN
