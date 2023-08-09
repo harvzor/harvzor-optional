@@ -1,4 +1,4 @@
-﻿[![Build](https://github.com/harvzor/harvzor-optional/actions/workflows/build.yml/badge.svg)](https://github.com/harvzor/harvzor-optional/actions/workflows/build.yml)
+﻿[![Test](https://github.com/harvzor/harvzor-optional/actions/workflows/test.yml/badge.svg)](https://github.com/harvzor/harvzor-optional/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/harvzor/harvzor-optional/branch/master/graph/badge.svg?token=RT3EH7YLAA)](https://codecov.io/gh/harvzor/harvzor-optional)
 
 # Harvzor.Optional
 
