@@ -20,7 +20,7 @@ builder.Services
     .AddNewtonsoftJson(options =>
     {
         options.SerializerSettings.Converters.Add(new OptionalJsonConverter());
-        options.SerializerSettings.ContractResolver = new OptionalShouldSerializeContractResolver();
+        options.SerializerSettings.ContractResolver = new IgnoreUndefinedOptionalsContractResolver();
     });
 
 var app = builder.Build();

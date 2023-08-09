@@ -11,7 +11,7 @@ Foo foo = JsonConvert.DeserializeObject<Foo>(json, new JsonSerializerSettings()
     {
         new OptionalJsonConverter(),
     },
-    ContractResolver = new OptionalShouldSerializeContractResolver(),
+    ContractResolver = new IgnoreUndefinedOptionalsContractResolver(),
 });
 
 Console.WriteLine(foo.DefinedProperty.IsDefined); // True

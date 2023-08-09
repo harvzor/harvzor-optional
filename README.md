@@ -110,10 +110,12 @@ To use it in your controller models, simply register in your startup:
 #### Harvzor.Optional.SystemTextJson
 
 ```csharp
+using Harvzor.Optional.SystemTextJson;
+
 services
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new Harvzor.Optional.SystemTextJson.OptionalJsonConverter());
+        options.JsonSerializerOptions.Converters.Add(new OptionalJsonConverter());
         options.JsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
         {
             Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
@@ -124,13 +126,13 @@ services
 #### Harvzor.Optional.NewtonsoftJson
 
 ```csharp
-using Harvzor.Optional.Swashbuckle;
+using Harvzor.Optional.NewtonsoftJson;
 
 services
     .AddNewtonsoftJson(options =>
     {
         options.SerializerSettings.Converters.Add(new OptionalJsonConverter());
-        options.SerializerSettings.ContractResolver = new OptionalShouldSerializeContractResolver();
+        options.SerializerSettings.ContractResolver = new IgnoreUndefinedOptionalsContractResolver();
     });
 ```
 
