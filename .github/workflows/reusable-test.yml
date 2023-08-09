@@ -15,10 +15,12 @@ jobs:
       - name: Run tests in docker image
         run: docker-compose run test
       - name: Get Codecov env
-        run: ci_env=`bash <(curl -s https://codecov.io/env)`
+        id: get-codecov-env
+        run: echo "ci_env=`bash <(curl -s https://codecov.io/env)`" >> "$GITHUB_OUTPUT"
       - name: Upload coverage reports to Codecov
         run: |
           echo $CODECOV_TOKEN
           docker-compose run $ci_env -e CI=true codecov-uploader $CODECOV_TOKEN
         env:
+          ci_env: ${{ steps.get-codecov-env.outputs.ci_env }}
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
