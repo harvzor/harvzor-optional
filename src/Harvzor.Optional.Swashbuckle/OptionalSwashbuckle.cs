@@ -242,6 +242,7 @@ public static class OptionalSwashbuckle
         };
     }
 
+    // todo: may want to ensure entire list from here is used https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/8f363f7359cb1cb8fa5de5195ec6d97aefaa16b3/test/Swashbuckle.AspNetCore.SwaggerGen.Test/SchemaGenerator/JsonSerializerSchemaGeneratorTests.cs#L35
     private static void GetTypeAndFormat(Type argumentType, out string argumentOpenApiType, out string? argumentFormat)
     {
         argumentFormat = null;
@@ -325,6 +326,9 @@ public static class OptionalSwashbuckle
     /// </param>
     public static SwaggerGenOptions FixOptionalMappings(this SwaggerGenOptions options, params Assembly[] assemblies)
     {
+        if (!assemblies.Any())
+            throw new ArgumentException("Expected at least one assembly.", nameof(assemblies));
+        
         foreach (Assembly assembly in assemblies)
             options.FixMappingsForUsedOptionalsInAssembly(assembly);
 
