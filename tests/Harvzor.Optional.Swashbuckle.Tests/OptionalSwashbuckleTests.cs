@@ -41,6 +41,13 @@ public class TestStartup
 
 public class OptionalSwashbuckleTests
 {
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// public int Post([FromBody] Optional<int> foo);
+    /// ]]>
+    /// </code>
+    /// </example>
     [Theory]
     [InlineData(typeof(int), typeof(Optional<int>), "IntOptional", "integer", "int32")]
     [InlineData(typeof(int?), typeof(Optional<int?>), "IntNullableOptional", "integer", "int32")]
@@ -51,11 +58,11 @@ public class OptionalSwashbuckleTests
     [InlineData(typeof(double), typeof(Optional<double>), "DoubleOptional", "number", "double")]
     [InlineData(typeof(double?), typeof(Optional<double?>), "DoubleNullableOptional", "number", "double")]
     [InlineData(typeof(string), typeof(Optional<string>), "StringOptional", "string", null)]
-    // [InlineData(typeof(string?), typeof(Optional<string?>), "StringNullableOptional", "string", null)]
     [InlineData(typeof(bool), typeof(Optional<bool>), "BoolOptional", "boolean", null)]
     [InlineData(typeof(bool?), typeof(Optional<bool?>), "BoolNullableOptional", "boolean", null)]
     [InlineData(typeof(DateTime), typeof(Optional<DateTime>), "DateTimeOptional", "string", "date-time")]
     [InlineData(typeof(DateTime?), typeof(Optional<DateTime?>), "DateTimeNullableOptional", "string", "date-time")]
+    // [InlineData(typeof(int[]), typeof(Optional<int[]>), "Int32ArrayOptional", "array", null)]
     public async void SwaggerEndpoint_ShouldOnlyHaveGenericTypes_WhenOptionalTypeIsInRequestBody(Type type, Type optionalType, string shouldNotContainKey, string typeShouldBe, string formatShouldBe)
     {
         // Act
@@ -113,7 +120,173 @@ public class OptionalSwashbuckleTests
         responseBodySchema.Type.ShouldBe(typeShouldBe);
         responseBodySchema.Format.ShouldBe(formatShouldBe);
     }
+    
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// public int[] Post([FromBody] Optional<int[]> foo);
+    /// ]]>
+    /// </code>
+    /// </example>
+    [Theory]
+    [InlineData(typeof(int[]), typeof(Optional<int[]>))]
+    [InlineData(typeof(IEnumerable<int>), typeof(Optional<IEnumerable<int>>))]
+    [InlineData(typeof(List<int>), typeof(Optional<List<int>>))]
+    public async void SwaggerEndpoint_ShouldOnlyHaveGenericTypes_WhenOptionalArrayTypeIsInRequestBody(Type type, Type optionalType)
+    {
+        // Act
 
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                type,
+                optionalType
+            )
+        );
+        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                type,
+                type
+            )
+        );
+
+        // Assert
+
+        swaggerResponse.EnsureSuccessStatusCode();
+
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(swaggerResponse);
+
+        openApiDocument.Components.Schemas.ShouldNotContainKey("StringNullableOptional");
+
+        OpenApiOperation? postOperation = openApiDocument
+            .Paths
+            .First()
+            .Value
+            .Operations
+            .First(x => x.Key == OperationType.Post)
+            .Value;
+
+        OpenApiSchema? requestBodySchema = postOperation.RequestBody
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+            
+        requestBodySchema.Type.ShouldBe("array");
+        requestBodySchema.Format.ShouldBe(null);
+        
+        requestBodySchema.Items.ShouldNotBe(null);
+        requestBodySchema.Items.Type.ShouldBe("integer");
+        requestBodySchema.Items.Format.ShouldBe("int32");
+
+        // Response isn't Optional<T>, but still check it's okay.
+        OpenApiSchema? responseBodySchema = postOperation
+            .Responses
+            .First()
+            .Value
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+        
+        responseBodySchema.Type.ShouldBe("array");
+        responseBodySchema.Format.ShouldBe(null);
+        
+        requestBodySchema.Items.ShouldNotBe(null);
+        requestBodySchema.Items.Type.ShouldBe("integer");
+        requestBodySchema.Items.Format.ShouldBe("int32");
+    }
+    
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// public int[][] Post([FromBody] Optional<int[][]> foo);
+    /// ]]>
+    /// </code>
+    /// </example>
+    [Fact]
+    public async void SwaggerEndpoint_ShouldOnlyHaveGenericTypes_WhenOptionalArrayOfArrayTypeIsInRequestBody()
+    {
+        // Act
+
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(int[][]),
+                typeof(Optional<int[][]>)
+            )
+        );
+        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(int[][]),
+                typeof(int[][])
+            )
+        );
+
+        // Assert
+
+        swaggerResponse.EnsureSuccessStatusCode();
+
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(swaggerResponse);
+
+        openApiDocument.Components.Schemas.ShouldNotContainKey("StringNullableOptional");
+
+        OpenApiOperation? postOperation = openApiDocument
+            .Paths
+            .First()
+            .Value
+            .Operations
+            .First(x => x.Key == OperationType.Post)
+            .Value;
+
+        OpenApiSchema? requestBodySchema = postOperation.RequestBody
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+            
+        requestBodySchema.Type.ShouldBe("array");
+        requestBodySchema.Format.ShouldBe(null);
+        
+        requestBodySchema.Items.ShouldNotBe(null);
+        requestBodySchema.Items.Type.ShouldBe("array");
+        requestBodySchema.Items.Format.ShouldBe(null);
+        
+        requestBodySchema.Items.Items.ShouldNotBe(null);
+        requestBodySchema.Items.Items.Type.ShouldBe("integer");
+        requestBodySchema.Items.Items.Format.ShouldBe("int32");
+
+        // Response isn't Optional<T>, but still check it's okay.
+        OpenApiSchema? responseBodySchema = postOperation
+            .Responses
+            .First()
+            .Value
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+        
+        responseBodySchema.Type.ShouldBe("array");
+        responseBodySchema.Format.ShouldBe(null);
+        
+        responseBodySchema.Items.ShouldNotBe(null);
+        responseBodySchema.Items.Type.ShouldBe("array");
+        responseBodySchema.Items.Format.ShouldBe(null);
+        
+        responseBodySchema.Items.Items.ShouldNotBe(null);
+        responseBodySchema.Items.Items.Type.ShouldBe("integer");
+        responseBodySchema.Items.Items.Format.ShouldBe("int32");
+    }
+
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// public string Post([FromQuery] Optional<string> foo);
+    /// ]]>
+    /// </code>
+    /// </example>
     [Fact(Skip =
         "Turns out Swashbuckle doesn't support a complex type being in a query param, even if I try to map it as a simple type. https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2226")]
     public async void SwaggerEndpoint_ShouldOnlyHaveStringTypes_WhenOptionalStringIsInRequestQueryParam()
@@ -146,6 +319,13 @@ public class OptionalSwashbuckleTests
         throw new NotImplementedException("If this ever works, actually check that the doc is correct.");
     }
 
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// public Optional<string> Post([FromBody] string foo);
+    /// ]]>
+    /// </code>
+    /// </example>
     [Fact]
     public async void SwaggerEndpoint_ShouldOnlyHaveStringTypes_WhenOptionalStringIsInResponse()
     {
@@ -205,6 +385,15 @@ public class OptionalSwashbuckleTests
     /// Often <see cref="IActionResult"/> is the return type for a controller method, but the actual response type is
     /// defined in the <see cref="ProducesResponseTypeAttribute"/>.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// [ProducesResponseType(typeof(Optional<string>), 200)]
+    /// [ProducesResponseType(typeof(Optional<int>), 201)]
+    /// public IActionResult Post([FromBody] string foo);
+    /// ]]>
+    /// </code>
+    /// </example>
     [Fact]
     public async void SwaggerEndpoint_ShouldOnlyHaveStringAndIntTypes_WhenOptionalStringAndIntIsDefinedInProducesResponseTypeAttributes()
     {
@@ -274,7 +463,6 @@ public class OptionalSwashbuckleTests
     }
     
     // todo: check nested objects work
-    // todo: check arrays work
 
     private async Task EnsureSwaggerResponsesAreIdentical(HttpResponseMessage optionalSwaggerResponse,
         HttpResponseMessage swaggerResponse)
