@@ -1,5 +1,6 @@
 ﻿using System.Net.Mime;
 using System.Reflection;
+using System.Reflection.Emit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -12,57 +13,10 @@ using Microsoft.OpenApi.Readers;
 
 namespace Harvzor.Optional.Swashbuckle.Tests;
 
-/// <summary>
-/// Example controller (which doesn't use <see cref="Optional{T}"/> to compare <see cref="Optional{T}"/>s against.
-/// </summary>
-[Route("/")]
-[ApiController]
-public class IndexWithNoOptionalRequestBodyController : ControllerBase
-{
-    [HttpPost]
-    public string Post([FromBody] string foo)
-    {
-        return foo;
-    }
-}
-
-[Route("/")]
-[ApiController]
-public class IndexWithOptionalRequestBodyController : ControllerBase
-{
-    [HttpPost]
-    public string Post([FromBody] Optional<string> foo)
-    {
-        return foo.Value;
-    }
-}
-
-[Route("/")]
-[ApiController]
-public class IndexWithOptionalResponseController : ControllerBase
-{
-    [HttpPost]
-    public Optional<string> Post([FromBody] string foo)
-    {
-        return foo;
-    }
-}
-
-[Route("/")]
-[ApiController]
-public class IndexWithOptionalQueryParamController : ControllerBase
-{
-    [HttpPost]
-    public string Post([FromQuery] Optional<string> foo)
-    {
-        return foo.Value;
-    }
-}
-
 public class TestStartup
 {
     public static Type? ControllersToUse { get; set; }
-    
+
     public void ConfigureServices(IServiceCollection services)
     {
         // services.AddControllers();
@@ -94,8 +48,12 @@ public class OptionalSwashbuckleTests
     {
         // Act
 
-        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController<IndexWithOptionalRequestBodyController>();
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController<IndexWithNoOptionalRequestBodyController>();
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<string, Optional<string>, FromBodyAttribute>()
+        );
+        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+            CreateController<string, string, FromBodyAttribute>()
+        );
 
         // Assert
 
@@ -135,14 +93,19 @@ public class OptionalSwashbuckleTests
             .Type
             .ShouldBe("string");
     }
-    
-    [Fact(Skip = "Turns out Swashbuckle doesn't support a complex type being in a query param, even if I try to map it as a simple type. https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2226")]
+
+    [Fact(Skip =
+        "Turns out Swashbuckle doesn't support a complex type being in a query param, even if I try to map it as a simple type. https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2226")]
     public async void SwaggerEndpoint_ShouldOnlyHaveStringTypes_WhenOptionalStringIsInRequestQueryParam()
     {
         // Act
 
-        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController<IndexWithOptionalQueryParamController>();
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController<IndexWithNoOptionalRequestBodyController>();
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<string, Optional<string>, FromQueryAttribute>()
+        );
+        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+            CreateController<string, string, FromQueryAttribute>()
+        );
 
         // Assert
 
@@ -162,8 +125,12 @@ public class OptionalSwashbuckleTests
     {
         // Act
 
-        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController<IndexWithOptionalResponseController>();
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController<IndexWithNoOptionalRequestBodyController>();
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<Optional<string>, string, FromBodyAttribute>()
+        );
+        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+            CreateController<string, string, FromBodyAttribute>()
+        );
 
         // Assert
 
@@ -189,7 +156,7 @@ public class OptionalSwashbuckleTests
             .Schema
             .Type
             .ShouldBe("string");
-        
+
         postOperation
             .Responses
             .First()
@@ -202,11 +169,12 @@ public class OptionalSwashbuckleTests
             .ShouldBe("string");
     }
 
-    private async void EnsureSwaggerResponsesAreIdentical(HttpResponseMessage optionalSwaggerResponse, HttpResponseMessage swaggerResponse)
+    private async void EnsureSwaggerResponsesAreIdentical(HttpResponseMessage optionalSwaggerResponse,
+        HttpResponseMessage swaggerResponse)
     {
         string optionalSwaggerResponseString = await optionalSwaggerResponse.Content.ReadAsStringAsync();
         string swaggerResponseString = await swaggerResponse.Content.ReadAsStringAsync();
-        
+
         optionalSwaggerResponseString.ShouldBe(swaggerResponseString);
     }
 
@@ -216,18 +184,82 @@ public class OptionalSwashbuckleTests
             .Read(await swaggerResponse.Content.ReadAsStreamAsync(), out _)!;
     }
 
-    private async Task<HttpResponseMessage> GetSwaggerResponseForController<T>() where T : ControllerBase
+    private async Task<HttpResponseMessage> GetSwaggerResponseForController(Type controller)
     {
-        TestStartup.ControllersToUse = typeof(T);
+        TestStartup.ControllersToUse = controller;
 
         HttpClient client = new TestSite(typeof(TestStartup))
             .BuildClient();
 
         HttpResponseMessage swaggerResponse = await client.GetAsync("/swagger/v1/swagger.json");
-        
+
         swaggerResponse.EnsureSuccessStatusCode();
-        
+
         return swaggerResponse;
+    }
+
+    // Create something like:
+    /*
+     * [Route("/")]
+     * [ApiController]
+     * public class IndexWithNoOptionalRequestBodyController<T> : ControllerBase
+     * {
+     *     [HttpPost]
+     *     public T Post([FromBody] T foo)
+     *     {
+     *         return foo;
+     *     }
+     * }
+     */
+    private Type CreateController<TReturnType, TParameterType, TParameterAttribute>()
+        where TParameterAttribute : Attribute
+    {
+        AssemblyName assemblyName = new AssemblyName("DynamicAssembly");
+        AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+        ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("DynamicModule");
+
+        TypeBuilder typeBuilder = moduleBuilder.DefineType(
+            "IndexController",
+            TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.AutoClass | TypeAttributes.AnsiClass |
+            TypeAttributes.BeforeFieldInit | TypeAttributes.AutoLayout,
+            typeof(ControllerBase)
+        );
+
+        Type routeAttribute = typeof(RouteAttribute);
+        Type apiControllerAttribute = typeof(ApiControllerAttribute);
+
+        ConstructorInfo? routeCtor = routeAttribute.GetConstructor(new[] { typeof(string) });
+        ConstructorInfo? apiControllerCtor = apiControllerAttribute.GetConstructor(Type.EmptyTypes);
+
+        typeBuilder.SetCustomAttribute(new CustomAttributeBuilder(routeCtor, new object[] { "/" }));
+        typeBuilder.SetCustomAttribute(new CustomAttributeBuilder(apiControllerCtor, new object[0]));
+
+        MethodBuilder methodBuilder = typeBuilder.DefineMethod(
+            "Post",
+            MethodAttributes.Public | MethodAttributes.Virtual,
+            typeof(TReturnType),
+            new[] { typeof(TParameterType) }
+        );
+
+        Type httpPostAttribute = typeof(HttpPostAttribute);
+
+        ConstructorInfo? httpPostCtor = httpPostAttribute.GetConstructor(Type.EmptyTypes);
+
+        methodBuilder.SetCustomAttribute(new CustomAttributeBuilder(httpPostCtor, new object[0]));
+
+        Type fromBodyAttribute = typeof(TParameterAttribute);
+        ConstructorInfo? fromBodyCtor = fromBodyAttribute.GetConstructor(Type.EmptyTypes);
+
+        ParameterBuilder parameterBuilder = methodBuilder.DefineParameter(1, ParameterAttributes.None, "foo");
+        parameterBuilder.SetCustomAttribute(new CustomAttributeBuilder(fromBodyCtor, new object[0]));
+
+        ILGenerator ilGenerator = methodBuilder.GetILGenerator();
+        ilGenerator.Emit(OpCodes.Ldarg_1); // Load the argument
+        ilGenerator.Emit(OpCodes.Call,
+            typeof(Optional<string>).GetProperty("Value").GetMethod); // Call the Value property getter
+        ilGenerator.Emit(OpCodes.Ret); // Return the result
+
+        return typeBuilder.CreateType();
     }
 }
 
