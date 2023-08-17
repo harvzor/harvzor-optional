@@ -56,7 +56,7 @@ public class OptionalSwashbuckleTests
     [InlineData(typeof(bool?), typeof(Optional<bool?>), "BoolNullableOptional", "boolean", null)]
     [InlineData(typeof(DateTime), typeof(Optional<DateTime>), "DateTimeOptional", "string", "date-time")]
     [InlineData(typeof(DateTime?), typeof(Optional<DateTime?>), "DateTimeNullableOptional", "string", "date-time")]
-    public async void SwaggerEndpoint_ShouldOnlyHaveStringTypes_WhenOptionalStringIsInRequestBody(Type type, Type optionalType, string shouldNotContainKey, string typeShouldBe, string formatShouldBe)
+    public async void SwaggerEndpoint_ShouldOnlyHaveGenericTypes_WhenOptionalTypeIsInRequestBody(Type type, Type optionalType, string shouldNotContainKey, string typeShouldBe, string formatShouldBe)
     {
         // Act
 
@@ -201,7 +201,78 @@ public class OptionalSwashbuckleTests
             .ShouldBe("string");
     }
     
-    // todo: test ProducesResponseType is used
+    /// <summary>
+    /// Often <see cref="IActionResult"/> is the return type for a controller method, but the actual response type is
+    /// defined in the <see cref="ProducesResponseTypeAttribute"/>.
+    /// </summary>
+    [Fact]
+    public async void SwaggerEndpoint_ShouldOnlyHaveStringAndIntTypes_WhenOptionalStringAndIntIsDefinedInProducesResponseTypeAttributes()
+    {
+        // Act
+
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(IActionResult), 
+                typeof(string),
+                new []{ (typeof(Optional<string>), 200), (typeof(Optional<int>), 201) }
+            )
+        );
+        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(IActionResult),
+                typeof(string),
+                new []{ (typeof(string), 200), (typeof(int), 201) }
+            )
+        );
+
+        // Assert
+
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
+
+        openApiDocument.Components.Schemas.ShouldNotContainKey("StringOptional");
+
+        OpenApiOperation? postOperation = openApiDocument
+            .Paths
+            .First()
+            .Value
+            .Operations
+            .First(x => x.Key == OperationType.Post)
+            .Value;
+
+        // Request isn't Optional<T>, but still check it's okay.
+        postOperation.RequestBody
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema
+            .Type
+            .ShouldBe("string");
+
+        postOperation
+            .Responses
+            .First(x => x.Key == "200")
+            .Value
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema
+            .Type
+            .ShouldBe("string");
+        
+        postOperation
+            .Responses
+            .First(x => x.Key == "201")
+            .Value
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema
+            .Type
+            .ShouldBe("integer");
+    }
+    
     // todo: check nested objects work
     // todo: check arrays work
 
@@ -247,7 +318,7 @@ public class OptionalSwashbuckleTests
      *     }
      * }
      */
-    private Type CreateController<TParameterAttribute>(Type returnType, Type parameterType)
+    private Type CreateController<TParameterAttribute>(Type returnType, Type parameterType, (Type, int)[]? producesResponseTypes = null)
         where TParameterAttribute : Attribute
     {
         AssemblyName assemblyName = new AssemblyName("DynamicAssembly");
@@ -264,8 +335,8 @@ public class OptionalSwashbuckleTests
         Type routeAttribute = typeof(RouteAttribute);
         Type apiControllerAttribute = typeof(ApiControllerAttribute);
 
-        ConstructorInfo? routeCtor = routeAttribute.GetConstructor(new[] { typeof(string) });
-        ConstructorInfo? apiControllerCtor = apiControllerAttribute.GetConstructor(Type.EmptyTypes);
+        ConstructorInfo routeCtor = routeAttribute.GetConstructor(new[] { typeof(string) })!;
+        ConstructorInfo apiControllerCtor = apiControllerAttribute.GetConstructor(Type.EmptyTypes)!;
 
         typeBuilder.SetCustomAttribute(new CustomAttributeBuilder(routeCtor, new object[] { "/" }));
         typeBuilder.SetCustomAttribute(new CustomAttributeBuilder(apiControllerCtor, new object[0]));
@@ -279,9 +350,21 @@ public class OptionalSwashbuckleTests
 
         Type httpPostAttribute = typeof(HttpPostAttribute);
 
-        ConstructorInfo? httpPostCtor = httpPostAttribute.GetConstructor(Type.EmptyTypes);
+        ConstructorInfo httpPostCtor = httpPostAttribute.GetConstructor(Type.EmptyTypes)!;
 
         methodBuilder.SetCustomAttribute(new CustomAttributeBuilder(httpPostCtor, new object[0]));
+
+        if (producesResponseTypes != null)
+        {
+            foreach ((Type type, int statusCode) in producesResponseTypes)
+            {
+                Type producesResponseTypeAttribute = typeof(ProducesResponseTypeAttribute);
+
+                ConstructorInfo producesResponseTypeCtor = producesResponseTypeAttribute.GetConstructor(new[] { typeof(Type), typeof(int) })!;
+            
+                methodBuilder.SetCustomAttribute(new CustomAttributeBuilder(producesResponseTypeCtor, new object[] { type, statusCode }));
+            }
+        }
 
         Type fromBodyAttribute = typeof(TParameterAttribute);
         ConstructorInfo? fromBodyCtor = fromBodyAttribute.GetConstructor(Type.EmptyTypes);
@@ -289,7 +372,7 @@ public class OptionalSwashbuckleTests
         ParameterBuilder parameterBuilder = methodBuilder.DefineParameter(1, ParameterAttributes.None, "foo");
         parameterBuilder.SetCustomAttribute(new CustomAttributeBuilder(fromBodyCtor, new object[0]));
 
-        var ilGenerator = methodBuilder.GetILGenerator();
+        ILGenerator ilGenerator = methodBuilder.GetILGenerator();
         ilGenerator.ThrowException(typeof(NotImplementedException));  // Throw NotImplementedException
         
         return typeBuilder.CreateType();
