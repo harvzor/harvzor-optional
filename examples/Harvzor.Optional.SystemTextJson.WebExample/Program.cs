@@ -58,11 +58,23 @@ public class IndexController : Controller
     }
     
     [HttpPost]
-    [ProducesResponseType(typeof(Optional<Foo>), 200)]
-    public IActionResult Post(Foo foo)
+    public IActionResult Post([FromBody] int? foo)
     {
         return Ok(new Optional<Foo>());
     }
+    
+    [HttpPost("optionalpost")]
+    public IActionResult OptionalPost(Optional<int?> foo)
+    {
+        return Ok(new Optional<Foo>());
+    }
+    
+    // [HttpPost]
+    // [ProducesResponseType(typeof(Optional<Foo>), 200)]
+    // public IActionResult Post(Foo foo)
+    // {
+    //     return Ok(new Optional<Foo>());
+    // }
     //
     // [HttpPost]
     // public Foo Post(Foo foo)
@@ -80,46 +92,46 @@ public record Foo
 
 public record Bar
 {
-    // public Optional<string?> OptionalNullableString { get; set; }
-    //
-    // // todo: I feel like `null` shouldn't be allowed?
-    // public Optional<string> OptionalString { get; set; }
-    //
-    // public string String { get; set; }
-    //
-    // public Optional<int?> OptionalNullableInt { get; set; }
-    //
-    // public Optional<int> OptionalInt { get; set; }
-    //
-    // public int? NullableInt { get; set; }
-    //
-    // public int Int { get; set; }
-    //
-    // public Optional<DateTime?> OptionalNullableDateTime { get; set; }
-    //
-    // public Optional<DateTime> OptionalDateTime { get; set; }
-    //
-    // public DateTime? NullableDateTime { get; set; }
-    //
-    // public DateTime DateTime { get; set; }
-    //
-    // public Optional<TimeSpan?> OptionalNullableTimeSpan { get; set; }
-    //
-    // public Optional<TimeSpan> OptionalTimeSpan { get; set; }
-    //
-    // public TimeSpan? NullableTimeSpan { get; set; }
-    //
-    // public TimeSpan TimeSpan { get; set; }
-    //
-    // public Optional<Version> OptionalVersion { get; set; }
+    public Optional<string?> OptionalNullableString { get; set; }
     
-    // public Optional<int[]> OptionalIntArray { get; set; }
-    //
-    // public int[] IntArray { get; set; } = { };
-    //
-    // public Optional<int[][]> OptionalIntArrayArray { get; set; }
-    //
-    // public int[][] IntArrayArray { get; set; }
+    // todo: I feel like `null` shouldn't be allowed?
+    public Optional<string> OptionalString { get; set; }
+    
+    public string String { get; set; }
+    
+    public Optional<int?> OptionalNullableInt { get; set; }
+    
+    public Optional<int> OptionalInt { get; set; }
+    
+    public int? NullableInt { get; set; }
+    
+    public int Int { get; set; }
+    
+    public Optional<DateTime?> OptionalNullableDateTime { get; set; }
+    
+    public Optional<DateTime> OptionalDateTime { get; set; }
+    
+    public DateTime? NullableDateTime { get; set; }
+    
+    public DateTime DateTime { get; set; }
+    
+    public Optional<TimeSpan?> OptionalNullableTimeSpan { get; set; }
+    
+    public Optional<TimeSpan> OptionalTimeSpan { get; set; }
+    
+    public TimeSpan? NullableTimeSpan { get; set; }
+    
+    public TimeSpan TimeSpan { get; set; }
+    
+    public Optional<Version> OptionalVersion { get; set; }
+    
+    public Optional<int[]> OptionalIntArray { get; set; }
+    
+    public int[] IntArray { get; set; } = { };
+    
+    public Optional<int[][]> OptionalIntArrayArray { get; set; }
+    
+    public int[][] IntArrayArray { get; set; }
 }
 
 // todo: test https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v6.5.0/test/Swashbuckle.AspNetCore.IntegrationTests/DocumentProviderTests.cs

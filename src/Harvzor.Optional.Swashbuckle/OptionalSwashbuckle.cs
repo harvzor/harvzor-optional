@@ -186,8 +186,9 @@ public static class OptionalSwashbuckle
             {
                 Type = argumentOpenApiType,
                 Format = argumentFormat,
+                // Nullable only seems to work when it's a single property, not when it's a property in an object?
                 // todo: create example project showing Nullable doesn't seem to work
-                Nullable = argumentType.IsReferenceOrNullableType() // Should catch `string` and `int?`.
+                // Nullable = argumentType.IsReferenceOrNullableType() // Should catch `string` and `int?`.
                     // || (
                     //     argumentType.IsGenericType
                     //     && argumentType.GetGenericTypeDefinition() == typeof(Nullable<>)
@@ -267,7 +268,7 @@ public static class OptionalSwashbuckle
             argumentOpenApiType = "number";
             argumentFormat = "double";
         }
-        else if (argumentType == typeof(string))
+        else if (argumentType == typeof(string) /* || argumentType == typeof(string?) */)
         {
             argumentOpenApiType = "string";
         }

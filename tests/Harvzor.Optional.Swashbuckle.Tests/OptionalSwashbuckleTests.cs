@@ -15,21 +15,19 @@ namespace Harvzor.Optional.Swashbuckle.Tests;
 
 public class TestStartup
 {
-    public static Type? ControllersToUse { get; set; }
+    public static Type? ControllerToUse { get; set; }
 
     public void ConfigureServices(IServiceCollection services)
     {
         // services.AddControllers();
         services
             .AddMvcCore()
-            .UseSpecificControllers(ControllersToUse!)
+            .UseSpecificControllers(ControllerToUse!)
             .AddApiExplorer();
 
         services.AddSwaggerGen(options =>
         {
-            // Just to ensure that the name of the controllers are always the same in Swagger:
-            options.TagActionsBy(api => api.RelativePath);
-            options.FixOptionalMappings(ControllersToUse!.Assembly);
+            options.FixOptionalMappings(ControllerToUse!.Assembly);
         });
     }
 
@@ -43,27 +41,47 @@ public class TestStartup
 
 public class OptionalSwashbuckleTests
 {
-    [Fact]
-    public async void SwaggerEndpoint_ShouldOnlyHaveStringTypes_WhenOptionalStringIsInRequestBody()
+    [Theory]
+    [InlineData(typeof(int), typeof(Optional<int>), "IntOptional", "integer", "int32")]
+    [InlineData(typeof(int?), typeof(Optional<int?>), "IntNullableOptional", "integer", "int32")]
+    [InlineData(typeof(long), typeof(Optional<long>), "LongOptional", "integer", "int64")]
+    [InlineData(typeof(long?), typeof(Optional<long?>), "LongNullableOptional", "integer", "int64")]
+    [InlineData(typeof(float), typeof(Optional<float>), "FloatOptional", "number", "float")]
+    [InlineData(typeof(float?), typeof(Optional<float?>), "FloatNullableOptional", "number", "float")]
+    [InlineData(typeof(double), typeof(Optional<double>), "DoubleOptional", "number", "double")]
+    [InlineData(typeof(double?), typeof(Optional<double?>), "DoubleNullableOptional", "number", "double")]
+    [InlineData(typeof(string), typeof(Optional<string>), "StringOptional", "string", null)]
+    // [InlineData(typeof(string?), typeof(Optional<string?>), "StringNullableOptional", "string", null)]
+    [InlineData(typeof(bool), typeof(Optional<bool>), "BoolOptional", "boolean", null)]
+    [InlineData(typeof(bool?), typeof(Optional<bool?>), "BoolNullableOptional", "boolean", null)]
+    [InlineData(typeof(DateTime), typeof(Optional<DateTime>), "DateTimeOptional", "string", "date-time")]
+    [InlineData(typeof(DateTime?), typeof(Optional<DateTime?>), "DateTimeNullableOptional", "string", "date-time")]
+    public async void SwaggerEndpoint_ShouldOnlyHaveStringTypes_WhenOptionalStringIsInRequestBody(Type type, Type optionalType, string shouldNotContainKey, string typeShouldBe, string formatShouldBe)
     {
         // Act
 
         HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
-            CreateController<string, Optional<string>, FromBodyAttribute>()
+            CreateController<FromBodyAttribute>(
+                type,
+                optionalType
+            )
         );
         HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
-            CreateController<string, string, FromBodyAttribute>()
+            CreateController<FromBodyAttribute>(
+                type,
+                type
+            )
         );
 
         // Assert
 
         swaggerResponse.EnsureSuccessStatusCode();
 
-        EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
 
         OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(swaggerResponse);
 
-        openApiDocument.Components.Schemas.ShouldNotContainKey("StringOptional");
+        openApiDocument.Components.Schemas.ShouldNotContainKey(shouldNotContainKey);
 
         OpenApiOperation? postOperation = openApiDocument
             .Paths
@@ -73,25 +91,27 @@ public class OptionalSwashbuckleTests
             .First(x => x.Key == OperationType.Post)
             .Value;
 
-        postOperation.RequestBody
+        OpenApiSchema? requestBodySchema = postOperation.RequestBody
             .Content
             .First(x => x.Key == MediaTypeNames.Application.Json)
             .Value
-            .Schema
-            .Type
-            .ShouldBe("string");
+            .Schema;
+            
+        requestBodySchema.Type.ShouldBe(typeShouldBe);
+        requestBodySchema.Format.ShouldBe(formatShouldBe);
 
         // Response isn't Optional<T>, but still check it's okay.
-        postOperation
+        OpenApiSchema? responseBodySchema = postOperation
             .Responses
             .First()
             .Value
             .Content
             .First(x => x.Key == MediaTypeNames.Application.Json)
             .Value
-            .Schema
-            .Type
-            .ShouldBe("string");
+            .Schema;
+        
+        responseBodySchema.Type.ShouldBe(typeShouldBe);
+        responseBodySchema.Format.ShouldBe(formatShouldBe);
     }
 
     [Fact(Skip =
@@ -101,17 +121,23 @@ public class OptionalSwashbuckleTests
         // Act
 
         HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
-            CreateController<string, Optional<string>, FromQueryAttribute>()
+            CreateController<FromQueryAttribute>(
+                typeof(string),
+                typeof(Optional<string>)
+            )
         );
         HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
-            CreateController<string, string, FromQueryAttribute>()
+            CreateController<FromQueryAttribute>(
+                typeof(string),
+                typeof(string)
+            )
         );
 
         // Assert
 
         swaggerResponse.EnsureSuccessStatusCode();
 
-        EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
 
         OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(swaggerResponse);
 
@@ -126,15 +152,21 @@ public class OptionalSwashbuckleTests
         // Act
 
         HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
-            CreateController<Optional<string>, string, FromBodyAttribute>()
+            CreateController<FromBodyAttribute>(
+                typeof(Optional<string>), 
+                typeof(string)
+            )
         );
         HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
-            CreateController<string, string, FromBodyAttribute>()
+            CreateController<FromBodyAttribute>(
+                typeof(string),
+                typeof(string)
+            )
         );
 
         // Assert
 
-        EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
 
         OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
 
@@ -168,8 +200,12 @@ public class OptionalSwashbuckleTests
             .Type
             .ShouldBe("string");
     }
+    
+    // todo: test ProducesResponseType is used
+    // todo: check nested objects work
+    // todo: check arrays work
 
-    private async void EnsureSwaggerResponsesAreIdentical(HttpResponseMessage optionalSwaggerResponse,
+    private async Task EnsureSwaggerResponsesAreIdentical(HttpResponseMessage optionalSwaggerResponse,
         HttpResponseMessage swaggerResponse)
     {
         string optionalSwaggerResponseString = await optionalSwaggerResponse.Content.ReadAsStringAsync();
@@ -186,7 +222,7 @@ public class OptionalSwashbuckleTests
 
     private async Task<HttpResponseMessage> GetSwaggerResponseForController(Type controller)
     {
-        TestStartup.ControllersToUse = controller;
+        TestStartup.ControllerToUse = controller;
 
         HttpClient client = new TestSite(typeof(TestStartup))
             .BuildClient();
@@ -211,7 +247,7 @@ public class OptionalSwashbuckleTests
      *     }
      * }
      */
-    private Type CreateController<TReturnType, TParameterType, TParameterAttribute>()
+    private Type CreateController<TParameterAttribute>(Type returnType, Type parameterType)
         where TParameterAttribute : Attribute
     {
         AssemblyName assemblyName = new AssemblyName("DynamicAssembly");
@@ -237,8 +273,8 @@ public class OptionalSwashbuckleTests
         MethodBuilder methodBuilder = typeBuilder.DefineMethod(
             "Post",
             MethodAttributes.Public | MethodAttributes.Virtual,
-            typeof(TReturnType),
-            new[] { typeof(TParameterType) }
+            returnType,
+            new[] { parameterType }
         );
 
         Type httpPostAttribute = typeof(HttpPostAttribute);
@@ -253,12 +289,9 @@ public class OptionalSwashbuckleTests
         ParameterBuilder parameterBuilder = methodBuilder.DefineParameter(1, ParameterAttributes.None, "foo");
         parameterBuilder.SetCustomAttribute(new CustomAttributeBuilder(fromBodyCtor, new object[0]));
 
-        ILGenerator ilGenerator = methodBuilder.GetILGenerator();
-        ilGenerator.Emit(OpCodes.Ldarg_1); // Load the argument
-        ilGenerator.Emit(OpCodes.Call,
-            typeof(Optional<string>).GetProperty("Value").GetMethod); // Call the Value property getter
-        ilGenerator.Emit(OpCodes.Ret); // Return the result
-
+        var ilGenerator = methodBuilder.GetILGenerator();
+        ilGenerator.ThrowException(typeof(NotImplementedException));  // Throw NotImplementedException
+        
         return typeBuilder.CreateType();
     }
 }
