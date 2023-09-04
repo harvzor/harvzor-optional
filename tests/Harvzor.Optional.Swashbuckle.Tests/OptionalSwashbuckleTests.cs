@@ -461,8 +461,25 @@ public class OptionalSwashbuckleTests
             .Type
             .ShouldBe("integer");
     }
-    
+
     // todo: check nested objects work
+    // todo: check FixOptionalMappingForType works
+
+    [Fact]
+    public void FixOptionalMappings_ShouldThrowException_WhenNoAssemblyProvided()
+    {
+        // Arrange
+        
+        IServiceCollection? services = null;
+        
+        // Act
+
+        Func<IServiceCollection> action = () => services.AddSwaggerGen();
+        
+        // Assert
+
+        action.ShouldThrow<ArgumentException>();
+    }
 
     private async Task EnsureSwaggerResponsesAreIdentical(HttpResponseMessage optionalSwaggerResponse,
         HttpResponseMessage swaggerResponse)
