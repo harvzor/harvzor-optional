@@ -462,6 +462,85 @@ public class OptionalSwashbuckleTests
             .ShouldBe("integer");
     }
 
+    private class Foo
+    {
+        public string Bar { get; set; }
+    }
+    
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// public Foo Post([FromBody] Optional<Foo> foo);
+    /// ]]>
+    /// </code>
+    /// </example>
+    [Fact]
+    public async void SwaggerEndpoint_ShouldOnlyHaveObjects_WhenOptionalObjectIsInRequest()
+    {
+        // Act
+
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(Foo), 
+                typeof(Optional<Foo>)
+            )
+        );
+        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(Foo), 
+                typeof(Foo)
+            )
+        );
+
+        // Assert
+
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
+
+        OpenApiOperation? postOperation = openApiDocument
+            .Paths
+            .First()
+            .Value
+            .Operations
+            .First(x => x.Key == OperationType.Post)
+            .Value;
+
+        OpenApiSchema requestSchema = postOperation.RequestBody
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+            
+        requestSchema.Type.ShouldBe("object");
+        requestSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(Foo)}");
+
+        OpenApiSchema responseSchema = postOperation
+            .Responses
+            .First()
+            .Value
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+        
+        responseSchema.Type.ShouldBe("object");
+        responseSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(Foo)}");
+
+        OpenApiSchema fooSchema = openApiDocument
+            .Components
+            .Schemas
+            .First(x => x.Key == $"{nameof(Foo)}")
+            .Value;
+
+        fooSchema
+            .Properties
+            .First(x => x.Key == nameof(Foo.Bar).ToLower())
+            .Value
+            .Type
+            .ShouldBe("string");
+    }
+
     // todo: check nested objects work
     // todo: check FixOptionalMappingForType works
 
