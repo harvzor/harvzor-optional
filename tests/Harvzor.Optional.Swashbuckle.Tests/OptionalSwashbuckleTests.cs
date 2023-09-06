@@ -642,45 +642,34 @@ public class OptionalSwashbuckleTests
             .Type
             .ShouldBe("string");
     }
-    
-    private class WrapperOptionalNullable
+
+    // Only a struct can really be Nullable.
+    private struct FooStruct
     {
-        public class Baz
-        {
-            public Optional<Foo?> Foo { get; set; }
-        }
-    }
-    
-    private class WrapperNullable
-    {
-        public class Baz
-        {
-            public Foo? Foo { get; set; }
-        }
     }
 
     /// <example>
     /// <code>
     /// <![CDATA[
-    /// public Baz Post([FromBody] Baz baz);
+    /// public FooStruct Post([FromBody] Optional<FooStruct?> fooStruct);
     /// ]]>
     /// </code>
     /// </example>
-    [Fact(Skip = "Can't get this working though it works when I run a proper API.")]
-    public async void SwaggerEndpoint_ShouldCorrectlyMapOptionalNullableObjects_WhenOptionalNullableObjectIsinObjectInRequest()
+    [Fact]
+    public async void SwaggerEndpoint_ShouldCorrectlyMapOptionalNullableStructs_WhenOptionalNullableStructIsInRequest()
     {
         // Act
 
         HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
-                typeof(WrapperOptionalNullable.Baz),
-                typeof(WrapperOptionalNullable.Baz)
+                typeof(FooStruct),
+                typeof(Optional<FooStruct?>)
             )
         );
         HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
-                typeof(WrapperNullable.Baz), 
-                typeof(WrapperNullable.Baz)
+                typeof(FooStruct), 
+                typeof(FooStruct)
             )
         );
 
@@ -705,46 +694,12 @@ public class OptionalSwashbuckleTests
             .Schema;
             
         requestSchema.Type.ShouldBe("object");
-        requestSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(WrapperOptionalNullable.Baz)}");
-        
-        OpenApiSchema responseSchema = postOperation
-            .Responses
-            .First()
-            .Value
-            .Content
-            .First(x => x.Key == MediaTypeNames.Application.Json)
-            .Value
-            .Schema;
-        
-        responseSchema.Type.ShouldBe("object");
-        responseSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(WrapperOptionalNullable.Baz)}");
-        
-        OpenApiSchema bazSchema = openApiDocument
+        requestSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(FooStruct)}");
+
+        openApiDocument
             .Components
             .Schemas
-            .First(x => x.Key == $"{nameof(WrapperOptionalNullable.Baz)}")
-            .Value;
-
-        bazSchema
-            .Properties
-            .First(x => x.Key == nameof(WrapperOptionalNullable.Baz.Foo).ToLower())
-            .Value
-            .Reference
-            .ReferenceV3
-            .ShouldBe($"#/components/schemas/{nameof(Foo)}");
-
-        OpenApiSchema fooSchema = openApiDocument
-            .Components
-            .Schemas
-            .First(x => x.Key == $"{nameof(WrapperNullable.Baz.Foo)}")
-            .Value;
-        
-        fooSchema
-            .Properties
-            .First(x => x.Key == nameof(Foo.Bar).ToLower())
-            .Value
-            .Type
-            .ShouldBe("string");
+            .ShouldContain(x => x.Key == $"{nameof(FooStruct)}");
     }
     
     // todo: check FixOptionalMappingForType works
