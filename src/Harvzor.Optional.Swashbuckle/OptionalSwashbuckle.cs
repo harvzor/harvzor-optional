@@ -146,13 +146,17 @@ public static class OptionalSwashbuckle
         foreach (Type typeUsingOptional in typesUsingOptional)
             options.FixOptionalMappingForType(typeUsingOptional);
     }
-
-    /// <inheritdoc cref="FixOptionalMappingForType"/>
+    
+    /// <summary>
+    /// Fix the mapping for a <see cref="Optional{T}"/> type.
+    /// </summary>
+    /// <typeparam name="T">Pass in a <see cref="Optional{T}"/> type.</typeparam>
+    /// <param name="options">Swagger options you get access to when calling `services.AddSwaggerGen(options => {});`.</param>
     public static SwaggerGenOptions FixOptionalMappingForType<T>(this SwaggerGenOptions options)
     {
         return options.FixOptionalMappingForType(typeof(T));
     }
-
+    
     /// <summary>
     /// Fix the mapping for a <see cref="Optional{T}"/> type.
     /// </summary>
