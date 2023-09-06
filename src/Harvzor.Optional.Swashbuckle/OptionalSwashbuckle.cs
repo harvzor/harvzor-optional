@@ -16,8 +16,8 @@ public static class OptionalSwashbuckle
     /// Remaps a <see cref="Optional{T}"/> to its T argument, and also ensures that the T argument is in the schema repo.
     /// </summary>
     /// <param name="options"></param>
-    /// <param name="optionalTypes">Should be of type <see cref="Optional{T}"/>.</param>
-    private static void RemapOptionalObject(this SwaggerGenOptions options, params Type[] optionalTypes)
+    /// <param name="optionalType">Should be of type <see cref="Optional{T}"/>.</param>
+    private static void RemapOptionalObject(this SwaggerGenOptions options, Type optionalType)
     {
         // Create OptionalDocumentFilter<T>.
         Type CreateGenericOptionalDocumentFilter(Type argumentType)
@@ -37,38 +37,35 @@ public static class OptionalSwashbuckle
             genericDocumentFilterMethod.Invoke(null, new object?[] { options, Array.Empty<object>() });
         }
 
-        foreach (Type optionalType in optionalTypes)
+        Type genericType = optionalType.GetGenericArguments().First();
+
+        bool isNullable = genericType.IsGenericType
+            && genericType.GetGenericTypeDefinition() == typeof(Nullable<>);
+        
+        if (isNullable)
+            genericType = genericType.GetGenericArguments().First();
+
+        // Ensure the same type isn't mapped twice somehow otherwise `options.MapType` will throw.
+        if (options.SchemaGeneratorOptions.CustomTypeMappings.Any(x => x.Key == optionalType))
+            return;
+        
+        // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other
+        // types like Optional<int> are (even if they've been mapped!).
+        options.MapType(optionalType, () => new OpenApiSchema
         {
-            Type genericType = optionalType.GetGenericArguments().First();
-
-            bool isNullable = genericType.IsGenericType
-                && genericType.GetGenericTypeDefinition() == typeof(Nullable<>);
-            
-            if (isNullable)
-                genericType = genericType.GetGenericArguments().First();
-
-            // Ensure the same type isn't mapped twice somehow otherwise `options.MapType` will throw.
-            if (options.SchemaGeneratorOptions.CustomTypeMappings.Any(x => x.Key == optionalType))
-                continue;
-            
-            // Mapping this will strangely mean that Optional<T> is not picked up in the SchemaFilter, though other
-            // types like Optional<int> are (even if they've been mapped!).
-            options.MapType(optionalType, () => new OpenApiSchema
+            Type = "object",
+            // Seems that Swagger doesn't mark references as nullable ever?
+            // Nullable = isNullable,
+            Reference = new OpenApiReference
             {
-                Type = "object",
-                // Seems that Swagger doesn't mark references as nullable ever?
-                // Nullable = isNullable,
-                Reference = new OpenApiReference
-                {
-                    Id = genericType.Name,
-                    Type = ReferenceType.Schema,
-                }
-            });
+                Id = genericType.Name,
+                Type = ReferenceType.Schema,
+            }
+        });
 
-            // This should do the same as `options.DocumentFilter<OptionalDocumentFilter<T>>();`
-            Type genericDocumentFilterType = CreateGenericOptionalDocumentFilter(genericType);
-            InvokeDocumentFilter(genericDocumentFilterType);
-        }
+        // This should do the same as `options.DocumentFilter<OptionalDocumentFilter<T>>();`
+        Type genericDocumentFilterType = CreateGenericOptionalDocumentFilter(genericType);
+        InvokeDocumentFilter(genericDocumentFilterType);
     }
     
     private static void FixMappingsForUsedOptionalsInAssembly(this SwaggerGenOptions options, Assembly assembly)
