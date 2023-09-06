@@ -58,39 +58,20 @@ public class IndexController : Controller
     }
     
     [HttpPost]
-    public IActionResult Post([FromBody] int? foo)
+    public IActionResult Post([FromBody] Foo foo)
     {
         return Ok(new Optional<Foo>());
     }
-    
-    [HttpPost("optionalpost")]
-    public IActionResult OptionalPost(Optional<int?> foo)
-    {
-        return Ok(new Optional<Foo>());
-    }
-    
-    // [HttpPost]
-    // [ProducesResponseType(typeof(Optional<Foo>), 200)]
-    // public IActionResult Post(Foo foo)
-    // {
-    //     return Ok(new Optional<Foo>());
-    // }
-    //
-    // [HttpPost]
-    // public Foo Post(Foo foo)
-    // {
-    //     return foo;
-    // }
 }
 
-public record Foo
+public class Foo
 {
-    public Optional<Bar> OptionalBar { get; set; }
+    public Optional<Bar?> OptionalBar { get; set; }
     
     // public Bar Bar { get; set; }
 }
 
-public record Bar
+public class Bar
 {
     public Optional<string?> OptionalNullableString { get; set; }
     
