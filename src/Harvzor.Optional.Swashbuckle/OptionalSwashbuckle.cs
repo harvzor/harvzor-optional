@@ -82,21 +82,20 @@ public static class OptionalSwashbuckle
                 ? type.GetGenericArguments().First()
                 : type;
 
-            if (nonOptionalType.Assembly == assembly)
+            Type[] propertyTypes = nonOptionalType
+                .GetProperties()
+                .Select(property => property.PropertyType)
+                // Prevent recursion loop.
+                .Where(propertyType => propertyType != type)
+                .ToArray();
+
+            foreach (Type propertyType in propertyTypes)
             {
-                Type[] propertyTypes = nonOptionalType
-                    .GetProperties()
-                    .Select(property => property.PropertyType)
-                    .ToArray();
+                foreach (Type item in WalkPropertiesAndFindOptionalProperties(propertyType))
+                    yield return item;
 
-                foreach (Type propertyType in propertyTypes)
-                {
-                    foreach (Type item in WalkPropertiesAndFindOptionalProperties(propertyType))
-                        yield return item;
-
-                    if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == openGenericOptionalType)
-                        yield return propertyType;
-                }
+                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == openGenericOptionalType)
+                    yield return propertyType;
             }
         }
         

@@ -541,7 +541,108 @@ public class OptionalSwashbuckleTests
             .ShouldBe("string");
     }
 
-    // todo: check nested objects work
+    // Wrap so the version which uses Optional<T> can have the same name as the one that doesn't.
+    private class WrapperOptional
+    {
+        public class Baz
+        {
+            public Optional<Foo> Foo { get; set; }
+        }
+    }
+    
+    private class Baz
+    {
+        public Foo Foo { get; set; }
+    }
+
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// public Foo Post([FromBody] Bar foo);
+    /// ]]>
+    /// </code>
+    /// </example>
+    [Fact]
+    public async void SwaggerEndpoint_ShouldCorrectlyMapNestedObjects_WhenOptionalObjectIsinObjectInRequest()
+    {
+        // Act
+
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(WrapperOptional.Baz), 
+                typeof(WrapperOptional.Baz)
+            )
+        );
+        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(Baz), 
+                typeof(Baz)
+            )
+        );
+
+        // Assert
+
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
+        
+        OpenApiOperation? postOperation = openApiDocument
+            .Paths
+            .First()
+            .Value
+            .Operations
+            .First(x => x.Key == OperationType.Post)
+            .Value;
+        
+        OpenApiSchema requestSchema = postOperation.RequestBody
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+            
+        requestSchema.Type.ShouldBe("object");
+        requestSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(WrapperOptional.Baz)}");
+        
+        OpenApiSchema responseSchema = postOperation
+            .Responses
+            .First()
+            .Value
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+        
+        responseSchema.Type.ShouldBe("object");
+        responseSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(WrapperOptional.Baz)}");
+        
+        OpenApiSchema bazSchema = openApiDocument
+            .Components
+            .Schemas
+            .First(x => x.Key == $"{nameof(WrapperOptional.Baz)}")
+            .Value;
+
+        bazSchema
+            .Properties
+            .First(x => x.Key == nameof(WrapperOptional.Baz.Foo).ToLower())
+            .Value
+            .Reference
+            .ReferenceV3
+            .ShouldBe($"#/components/schemas/{nameof(Foo)}");
+
+        OpenApiSchema fooSchema = openApiDocument
+            .Components
+            .Schemas
+            .First(x => x.Key == $"{nameof(Baz.Foo)}")
+            .Value;
+        
+        fooSchema
+            .Properties
+            .First(x => x.Key == nameof(Foo.Bar).ToLower())
+            .Value
+            .Type
+            .ShouldBe("string");
+    }
+    
     // todo: check FixOptionalMappingForType works
 
     [Fact]
