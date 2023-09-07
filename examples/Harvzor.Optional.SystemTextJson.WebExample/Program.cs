@@ -66,7 +66,9 @@ public class IndexController : Controller
 
 public class Foo
 {
-    public Optional<Bar?> OptionalBar { get; set; }
+    public Optional<string> String { get; set; }
+    
+    // public Optional<Bar?> OptionalBar { get; set; }
     
     // public Bar Bar { get; set; }
 }
