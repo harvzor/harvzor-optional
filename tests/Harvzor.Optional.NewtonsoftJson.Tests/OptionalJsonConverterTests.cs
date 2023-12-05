@@ -7,35 +7,23 @@ namespace Harvzor.Optional.NewtonsoftJson.Tests;
 
 public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
 {
-    protected override T Deserialize<T>(string str)
+    private JsonSerializerSettings GetJsonSerializerSettings() => new()
     {
-        return JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings()
+        Formatting = WriteIndented ? Formatting.Indented : Formatting.None,
+        Converters = new List<Newtonsoft.Json.JsonConverter>
         {
-            // TODO: setting to indented doesn't change the output as the output has been overwritten...
-            // Formatting = Formatting.Indented,
-            Converters = new List<Newtonsoft.Json.JsonConverter>
-            {
-                new OptionalJsonConverter(),
-            },
-            // Isn't needed as the contract resolver only effects writing:
-            // ContractResolver = new IgnoreUndefinedOptionalsContractResolver(),
-        })!;
-    }
+            new OptionalJsonConverter(),
+        },
+        // Not needed when only serializing:
+        ContractResolver = new IgnoreUndefinedOptionalsContractResolver(),
+    };
+    
+    protected override T Deserialize<T>(string str)
+        => JsonConvert.DeserializeObject<T>(str, GetJsonSerializerSettings())!;
 
     protected override string Serialize(object obj)
-    {
-        return JsonConvert.SerializeObject(obj, new JsonSerializerSettings()
-        {
-            // TODO: setting to indented doesn't change the output as the output has been overwritten...
-            // Formatting = Formatting.Indented,
-            Converters = new List<Newtonsoft.Json.JsonConverter>
-            {
-                new OptionalJsonConverter(),
-            },
-            ContractResolver = new IgnoreUndefinedOptionalsContractResolver(),
-        })!;
-    }
-    
+        => JsonConvert.SerializeObject(obj, GetJsonSerializerSettings())!;
+
     [Fact]
     [Trait("Category","Custom Attribute")]
     public void WriteJson_ShouldIgnoreProperty_WhenPropertyIsIgnored()

@@ -7,11 +7,10 @@ namespace Harvzor.Optional.SystemTextJson.Tests;
 
 public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    private JsonSerializerOptions GetJsonSerializerOptions() => new()
     {
         IncludeFields = true,
-        // todo: ensure that indenting changes the output
-        // WriteIndented = true,
+        WriteIndented = WriteIndented,
         Converters =
         {
             new OptionalJsonConverter()
@@ -23,15 +22,11 @@ public class OptionalJsonConverterTests : OptionalJsonConverterBaseTests
     };
 
     protected override T Deserialize<T>(string str)
-    {
-        return JsonSerializer.Deserialize<T>(str, _jsonSerializerOptions)!;
-    }
+        => JsonSerializer.Deserialize<T>(str, GetJsonSerializerOptions())!;
 
     protected override string Serialize(object obj)
-    {
-        return JsonSerializer.Serialize(obj, _jsonSerializerOptions);
-    }
-    
+        => JsonSerializer.Serialize(obj, GetJsonSerializerOptions());
+
     [Fact]
     [Trait("Category","Custom Attribute")]
     public void WriteJson_ShouldIgnoreProperty_WhenPropertyIsIgnored()

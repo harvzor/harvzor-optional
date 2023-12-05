@@ -6,6 +6,8 @@ namespace Harvzor.Optional.JsonConverter.BaseTests;
 /// </summary>
 public abstract class OptionalJsonConverterBaseTests
 {
+    protected bool WriteIndented;
+    
     protected abstract T Deserialize<T>(string str);
 
     protected abstract string Serialize(object obj);
@@ -229,6 +231,36 @@ public abstract class OptionalJsonConverterBaseTests
     }
     
     #endregion Property In Object
+    
+    #region Indenting Is Respected
+    
+    [Fact]
+    [Trait("Category","Indenting Is Respected")]
+    public void WriteJson_ShouldWriteIndentedValue_WhenIndentingIsSet()
+    {
+        // Arrange
+
+        WriteIndented = true;
+
+        ClassWithOptionalProperty classWithOptionalProperty = new ClassWithOptionalProperty
+        {
+            OptionalProperty = "some value"
+        };
+
+        // Act
+
+        string json = Serialize(classWithOptionalProperty);
+
+        // Assert
+
+        json.ShouldBe("""
+        {
+          "OptionalProperty": "some value"
+        }
+        """);
+    }
+    
+    #endregion Indenting Is Respected
     
     #region Field In Object
     
