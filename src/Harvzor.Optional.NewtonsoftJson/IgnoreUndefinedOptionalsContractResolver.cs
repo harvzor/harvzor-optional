@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Harvzor.Optional.NewtonsoftJson.Members;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
