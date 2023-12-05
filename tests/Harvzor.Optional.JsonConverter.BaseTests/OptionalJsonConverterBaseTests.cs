@@ -1,5 +1,9 @@
 namespace Harvzor.Optional.JsonConverter.BaseTests;
 
+/// <summary>
+/// Tests which should be repeated for both of the Newtonsoft and SystemTextJson implementations should be placed in
+/// here.
+/// </summary>
 public abstract class OptionalJsonConverterBaseTests
 {
     protected abstract T Deserialize<T>(string str);
