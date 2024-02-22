@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Harvzor.Optional.JsonConverter.BaseTests;
 
@@ -26,11 +27,11 @@ public class IntegrationTest
         // Act
 
         HttpResponseMessage response = await GetResponse(
-            CreateController<FromQueryAttribute>(
+            CreateController<FromBodyAttribute>(
                 typeof(bool),
                 typeof(Optional<bool>)
             ),
-           "true"
+           """{"foo": true}"""
         );
 
         // Assert
@@ -45,18 +46,19 @@ public class IntegrationTest
         HttpClient client = new TestSite(typeof(TestStartup))
             .BuildClient();
 
-        HttpResponseMessage response = await client.GetAsync(
-            "/?content=" + content
-        );
-        
-        // HttpResponseMessage response = await client.PostAsync(
-        //     "/",
-        //     new StringContent(
-        //         content,
-        //         Encoding.UTF8,
-        //         "application/x-www-form-urlencoded"
-        //     )
+        // HttpResponseMessage response = await client.GetAsync(
+        //     "/?content=" + content
         // );
+        
+        HttpResponseMessage response = await client.PostAsync(
+            "/",
+            new StringContent(
+                content,
+                Encoding.UTF8,
+                // "application/x-www-form-urlencoded"
+                "application/json"
+            )
+        );
 
         response.EnsureSuccessStatusCode();
 
@@ -67,10 +69,10 @@ public class IntegrationTest
     /*
      * [Route("/")]
      * [ApiController]
-     * public class IndexController<T> : ControllerBase
+     * public class IndexController<T> : Controller
      * {
-     *     [HttpGet]
-     *     public T Get([FromBody] T foo)
+     *     [HttpPost]
+     *     public T Post([FromBody] T foo)
      *     {
      *         return foo;
      *     }
@@ -87,7 +89,7 @@ public class IntegrationTest
             "IndexController",
             TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.AutoClass | TypeAttributes.AnsiClass |
             TypeAttributes.BeforeFieldInit | TypeAttributes.AutoLayout,
-            typeof(ControllerBase)
+            typeof(Controller)
         );
 
         Type routeAttribute = typeof(RouteAttribute);
@@ -100,14 +102,14 @@ public class IntegrationTest
         typeBuilder.SetCustomAttribute(new CustomAttributeBuilder(apiControllerCtor, Array.Empty<object>()));
 
         MethodBuilder methodBuilder = typeBuilder.DefineMethod(
-            "Get",
+            "Post",
             MethodAttributes.Public | MethodAttributes.Virtual,
             returnType,
             new[] { parameterType }
         );
 
-        // Type httpVerbAttribute = typeof(HttpPostAttribute);
-        Type httpVerbAttribute = typeof(HttpGetAttribute);
+        Type httpVerbAttribute = typeof(HttpPostAttribute);
+        // Type httpVerbAttribute = typeof(HttpGetAttribute);
 
         ConstructorInfo httpPostCtor = httpVerbAttribute.GetConstructor(Type.EmptyTypes)!;
 
@@ -130,13 +132,25 @@ public class IntegrationTest
 
         ParameterBuilder parameterBuilder = methodBuilder.DefineParameter(1, ParameterAttributes.None, "foo");
         parameterBuilder.SetCustomAttribute(new CustomAttributeBuilder(fromBodyCtor, Array.Empty<object>()));
-
+        
         ILGenerator ilGenerator = methodBuilder.GetILGenerator();
+        // ilGenerator.Emit(OpCodes.Ret); // Trying to return something doesn't work...
         ilGenerator.ThrowException(typeof(NotImplementedException));  // Throw NotImplementedException
 
         return typeBuilder.CreateType();
     }
 }
+
+// [Route("/")]
+// [ApiController]
+// public class IndexController<T> : ControllerBase
+// {
+//     [HttpPost]
+//     public T Post([FromBody] T foo)
+//     {
+//         return foo;
+//     }
+// }
 
 public class TestStartup
 {
@@ -144,6 +158,8 @@ public class TestStartup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddControllers();
+
         services
             .AddMvcCore()
             .UseSpecificControllers(ControllerToUse!);
@@ -152,6 +168,11 @@ public class TestStartup
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseRouting();
+        app.UseEndpoints(_ => _.MapDefaultControllerRoute());
+        
+        // UseEndpoints is used instead:
+        // https://stackoverflow.com/questions/74984717/how-to-convert-asp-net-webhost-builder-code-to-net-6-avoid-asp0009-warning-er
+        // app.MapDefaultControllerRoute();
     }
 }
 

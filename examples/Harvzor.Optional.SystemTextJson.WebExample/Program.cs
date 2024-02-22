@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization.Metadata;
 using Harvzor.Optional;
 using Harvzor.Optional.SystemTextJson;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
@@ -37,7 +38,7 @@ app
     .MapGet("/", () => "Hello World!");
 
 app
-    .MapPost("/", (Foo foo) =>
+    .MapPost("/", ([FromBody] Foo foo) =>
     {
         if (foo.OptionalString.IsDefined)
             return $"You're value is \"{foo.OptionalString.Value ?? "null"}\".";
