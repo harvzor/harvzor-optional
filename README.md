@@ -35,6 +35,12 @@ What if you want to allow a client to explicitly set null (`"{ "myProperty": nul
 
 ## The solution: Optional&lt;T&gt;
 
+Install:
+
+```
+> dotnet add package Harvzor.Optional
+```
+
 ### Basic example
 
 You can use `Optional<T>` to know if a property or variable has been explicitly instantiated:
@@ -107,7 +113,13 @@ public class Foo
 
 To use it in your controller models, simply register in your startup:
 
-#### Harvzor.Optional.SystemTextJson
+#### My APIs use System.Text.Json
+
+First install:
+
+```
+> dotnet add package Harvzor.Optional.SystemTextJson
+```
 
 [There doesn't appear to be a way to globally change the default settings in System.Text.Json](https://github.com/dotnet/runtime/issues/31094), this means that minimal APIs and controller-based web APIs use different instances and settings of STJ.
 
@@ -163,7 +175,13 @@ services.ConfigureHttpJsonOptions(options =>
 
 This solution was stolen from https://stackoverflow.com/questions/74889635/how-to-configure-json-name-case-policy-while-using-minimalapi/74889769#74889769.
 
-#### Harvzor.Optional.NewtonsoftJson
+#### My APIs use Newtonsoft.Json
+
+First, install:
+
+```
+> dotnet add package Harvzor.Optional.NewtonsoftJson
+```
 
 ```csharp
 using Harvzor.Optional.NewtonsoftJson;
@@ -196,7 +214,13 @@ This ends up being generated like:
 
 ![broken-swagger-docs.png](https://raw.githubusercontent.com/harvzor/harvzor-optional/master/.github/docs/broken-swagger-docs.png)
 
-Instead we want SwaggerGen to treat `Optional<T>` as the generic type `T`. To handle doing this, add this:
+Instead we want SwaggerGen to treat `Optional<T>` as the generic type `T`. To handle doing this, first install:
+
+```
+> dotnet add package Harvzor.Optional.NewtonsoftJson
+```
+
+Then add this magic line of code:
 
 ```csharp
 using Harvzor.Optional.Swashbuckle;
@@ -305,7 +329,6 @@ services.AddSwaggerGen(options =>
         Format = "date-time"
     });
     
-    // IEnumerables:
     options.MapType<Optional<IEnumerable<int>>>(() => new OpenApiSchema
     {
         Type = "array",
@@ -315,6 +338,8 @@ services.AddSwaggerGen(options =>
             Format = "int32"
         }
     });
+    
+    // There's way more types you can map, you should check which types your application uses and map those.
 });
 ```
 
@@ -362,11 +387,11 @@ private class GenerateSchemaFor<T> : IDocumentFilter where T : class
 In case the CI doesn't work:
 
 1. Get an API key from https://www.nuget.org/account/apikeys
-2.
-```
-docker-compose build --build-arg version="{version}" push-nuget
-docker-compose run --rm push-nuget --api-key {key}
-```
+2. Run with Docker:
+    ```
+    docker-compose build --build-arg version="{version}" push-nuget
+    docker-compose run --rm push-nuget --api-key {key}
+    ```
 
 ## Further reading
 
