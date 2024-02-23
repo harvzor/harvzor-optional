@@ -4,23 +4,24 @@ using Harvzor.Optional;
 using Harvzor.Optional.Swashbuckle;
 using Harvzor.Optional.SystemTextJson;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddSwaggerGen(options =>
     {
-        options.MapType<Optional<Version>>(() => new OpenApiSchema
-        {
-            Type = "string"
-        });
+        // Map types manually without Harvzor.Optional.Swashbuckle:
+        // options.MapType<Optional<string?>>(() => new OpenApiSchema
+        // {
+        //     Type = "string"
+        // });
         
+        // Auto fixes mappings:
         options.FixOptionalMappings(Assembly.GetExecutingAssembly());
+        
+        // Alternatively, specify specific types that should be fixed:
         // options
-        //     .FixOptionalMappingForType<Optional<Foo>>()
-        //     .FixOptionalMappingForType<Optional<Bar>>()
-        //     .FixOptionalMappingForType<Optional<int>>();
+        //     .FixOptionalMappingForType<Optional<string>>();
     });
 
 builder.Services
@@ -72,8 +73,5 @@ public class IndexController : Controller
 
 public class Foo
 {
-    public Optional<string?> OptionalString { get; set; }
+    public Optional<string?> OptionalString { get; set; }   
 }
-
-// todo: test https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v6.5.0/test/Swashbuckle.AspNetCore.IntegrationTests/DocumentProviderTests.cs
-// https://stackoverflow.com/questions/62996494/unit-testing-that-the-swagger-doc-is-correct-without-starting-a-server

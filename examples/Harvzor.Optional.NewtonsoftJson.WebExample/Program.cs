@@ -9,7 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddSwaggerGen(options =>
     {
+        // Map types manually without Harvzor.Optional.Swashbuckle:
+        // options.MapType<Optional<string?>>(() => new OpenApiSchema
+        // {
+        //     Type = "string"
+        // });
+        
+        // Auto fixes mappings:
         options.FixOptionalMappings(Assembly.GetExecutingAssembly());
+        
+        // Alternatively, specify specific types that should be fixed:
+        // options
+        //     .FixOptionalMappingForType<Optional<string>>();
     })
     .AddSwaggerGenNewtonsoftSupport();
 
