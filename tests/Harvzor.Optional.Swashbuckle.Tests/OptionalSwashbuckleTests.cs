@@ -776,8 +776,6 @@ public class OptionalSwashbuckleTests
             .ShouldContain(x => x.Key == $"{nameof(FooStruct)}");
     }
     
-    // todo: check FixOptionalMappingForType works
-
     [Fact]
     public void FixOptionalMappings_ShouldThrowException_WhenNoAssemblyProvided()
     {
