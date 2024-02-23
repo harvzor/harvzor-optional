@@ -109,10 +109,28 @@ To use it in your controller models, simply register in your startup:
 
 #### Harvzor.Optional.SystemTextJson
 
+[There doesn't appear to be a way to globally change the default settings in System.Text.Json](https://github.com/dotnet/runtime/issues/31094), this means that minimal APIs and controller-based web APIs use different instances and settings of STJ.
+
+So when you're trying to tell your APIs to use your specific converters, you need to make sure you set it up correctly:
+
 ```csharp
 using Harvzor.Optional.SystemTextJson;
 
+// IServiceCollection services; // Comes from your WebApplicationBuilder in Program.cs.
+
+// If you're using controller-based web APIs:
+services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new OptionalJsonConverter());
+    options.JsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+    {
+        Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
+    };
+});
+
+// Alternatively:
 services
+    .AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new OptionalJsonConverter());
@@ -121,7 +139,29 @@ services
             Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
         };
     });
+
+// If you're using minimal APIs:
+services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(new OptionalJsonConverter());
+    options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+    {
+        Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
+    };
+});
+
+// Alternatively:
+services.ConfigureHttpJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new OptionalJsonConverter());
+    options.JsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+    {
+        Modifiers = { OptionalTypeInfoResolverModifiers.IgnoreUndefinedOptionals }
+    };
+});
 ```
+
+This solution was stolen from https://stackoverflow.com/questions/74889635/how-to-configure-json-name-case-policy-while-using-minimalapi/74889769#74889769.
 
 #### Harvzor.Optional.NewtonsoftJson
 
