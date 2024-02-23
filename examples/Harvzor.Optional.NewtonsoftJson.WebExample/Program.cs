@@ -47,45 +47,19 @@ public class IndexController : Controller
     }
     
     [HttpPost]
-    public Optional<Foo> Post(Optional<Foo> foo)
+    public Foo Post(Foo foo)
     {
+        Console.WriteLine(
+            foo.OptionalString.IsDefined
+                ? $"You sent: {(foo.OptionalString.Value == null ? "null" : $"\"{foo.OptionalString.Value}\"")}"
+                : "You sent nothing!"
+        );
+
         return foo;
     }
 }
 
-public record Foo : Bar
+public class Foo
 {
-    public Optional<Bar?> OptionalNullableBar { get; set; }
-    
-    public Optional<Bar> OptionalBar { get; set; }
-
-    public Bar? NullableBar { get; set; }
-    
-    public Bar Bar { get; set; }
-}
-
-public record Bar
-{
-    public Optional<string?> OptionalNullableString { get; set; }
-    
-    // todo: I feel like `null` shouldn't be allowed?
-    public Optional<string> OptionalString { get; set; }
-    
-    public string String { get; set; }
-    
-    public Optional<int?> OptionalNullableInt { get; set; }
-    
-    public Optional<int> OptionalInt { get; set; }
-    
-    public int? NullableInt { get; set; }
-    
-    public int Int { get; set; }
-    
-    public Optional<DateTime?> OptionalNullableDateTime { get; set; }
-    
-    public Optional<DateTime> OptionalDateTime { get; set; }
-    
-    public DateTime? NullableDateTime { get; set; }
-    
-    public DateTime DateTime { get; set; }
+    public Optional<string?> OptionalString { get; set; }
 }

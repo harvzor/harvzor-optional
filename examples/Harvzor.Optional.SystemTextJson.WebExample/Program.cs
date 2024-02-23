@@ -58,61 +58,21 @@ public class IndexController : Controller
     }
     
     [HttpPost]
-    public Optional<Foo> Post(Optional<Foo> foo)
+    public Foo Post(Foo foo)
     {
+        Console.WriteLine(
+            foo.OptionalString.IsDefined
+                ? $"You sent: {(foo.OptionalString.Value == null ? "null" : $"\"{foo.OptionalString.Value}\"")}"
+                : "You sent nothing!"
+        );
+
         return foo;
     }
 }
 
 public class Foo
 {
-    public Optional<Bar?> OptionalBar { get; set; }
-    
-    // public Bar Bar { get; set; }
-}
-
-public class Bar
-{
-    public Optional<string?> OptionalNullableString { get; set; }
-    
-    // todo: I feel like `null` shouldn't be allowed?
-    public Optional<string> OptionalString { get; set; }
-
-    public string String { get; set; } = "";
-    
-    public Optional<int?> OptionalNullableInt { get; set; }
-    
-    public Optional<int> OptionalInt { get; set; }
-    
-    public int? NullableInt { get; set; }
-    
-    public int Int { get; set; }
-    
-    public Optional<DateTime?> OptionalNullableDateTime { get; set; }
-    
-    public Optional<DateTime> OptionalDateTime { get; set; }
-    
-    public DateTime? NullableDateTime { get; set; }
-    
-    public DateTime DateTime { get; set; }
-    
-    public Optional<TimeSpan?> OptionalNullableTimeSpan { get; set; }
-    
-    public Optional<TimeSpan> OptionalTimeSpan { get; set; }
-    
-    public TimeSpan? NullableTimeSpan { get; set; }
-    
-    public TimeSpan TimeSpan { get; set; }
-    
-    public Optional<Version> OptionalVersion { get; set; }
-    
-    public Optional<int[]> OptionalIntArray { get; set; }
-    
-    public int[] IntArray { get; set; } = Array.Empty<int>();
-    
-    public Optional<int[][]> OptionalIntArrayArray { get; set; }
-
-    public int[][] IntArrayArray { get; set; } = Array.Empty<int[]>();
+    public Optional<string?> OptionalString { get; set; }
 }
 
 // todo: test https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v6.5.0/test/Swashbuckle.AspNetCore.IntegrationTests/DocumentProviderTests.cs
