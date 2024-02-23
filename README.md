@@ -2,12 +2,12 @@
 
 # Harvzor.Optional
 
-| NuGet Package                   | Version                                                                                                                                     |
-|:--------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------|
-| Harvzor.Optional                | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional)](https://www.nuget.org/packages/Harvzor.Optional/)                               |
-| Harvzor.Optional.SystemTextJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.SystemTextJson)](https://www.nuget.org/packages/Harvzor.Optional.SystemTextJson/) |
-| Harvzor.Optional.NewtonsoftJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.NewtonsoftJson)](https://www.nuget.org/packages/Harvzor.Optional.NewtonsoftJson/) |
-| Harvzor.Optional.Swashbuckle    | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.Swashbuckle)](https://www.nuget.org/packages/Harvzor.Optional.Swashbuckle/)       |
+| NuGet Package                   | Version                                                                                                                                     | Purpose                                                                       |
+|:--------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| Harvzor.Optional                | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional)](https://www.nuget.org/packages/Harvzor.Optional/)                               | Contains core implementation of the `Optional<T>` type.                       |
+| Harvzor.Optional.SystemTextJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.SystemTextJson)](https://www.nuget.org/packages/Harvzor.Optional.SystemTextJson/) | Enables JSON conversion for the `Optional<T>` type using System.Text.Json.    |
+| Harvzor.Optional.NewtonsoftJson | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.NewtonsoftJson)](https://www.nuget.org/packages/Harvzor.Optional.NewtonsoftJson/) | Enables JSON conversion for the `Optional<T>` type using Newtonsoft Json.NET. |
+| Harvzor.Optional.Swashbuckle    | [![NuGet](https://img.shields.io/nuget/v/Harvzor.Optional.Swashbuckle)](https://www.nuget.org/packages/Harvzor.Optional.Swashbuckle/)       | Helps with type mappings in `Swashbuckle.AspNetCore` Swagger.                 |
 
 ## The problem
 
