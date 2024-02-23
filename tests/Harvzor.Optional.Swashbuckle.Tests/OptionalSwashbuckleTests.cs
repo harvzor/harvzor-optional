@@ -48,20 +48,94 @@ public class OptionalSwashbuckleTests
     /// ]]>
     /// </code>
     /// </example>
+    /// <remarks>
+    /// Should equal list from https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/8f363f7359cb1cb8fa5de5195ec6d97aefaa16b3/test/Swashbuckle.AspNetCore.SwaggerGen.Test/SchemaGenerator/JsonSerializerSchemaGeneratorTests.cs#L35.
+    /// </remarks>
     [Theory]
-    [InlineData(typeof(int), typeof(Optional<int>), "IntOptional", "integer", "int32")]
-    [InlineData(typeof(int?), typeof(Optional<int?>), "IntNullableOptional", "integer", "int32")]
-    [InlineData(typeof(long), typeof(Optional<long>), "LongOptional", "integer", "int64")]
-    [InlineData(typeof(long?), typeof(Optional<long?>), "LongNullableOptional", "integer", "int64")]
-    [InlineData(typeof(float), typeof(Optional<float>), "FloatOptional", "number", "float")]
-    [InlineData(typeof(float?), typeof(Optional<float?>), "FloatNullableOptional", "number", "float")]
-    [InlineData(typeof(double), typeof(Optional<double>), "DoubleOptional", "number", "double")]
-    [InlineData(typeof(double?), typeof(Optional<double?>), "DoubleNullableOptional", "number", "double")]
-    [InlineData(typeof(string), typeof(Optional<string>), "StringOptional", "string", null)]
+    // [InlineData(typeof(bool), "boolean", null)]
     [InlineData(typeof(bool), typeof(Optional<bool>), "BoolOptional", "boolean", null)]
     [InlineData(typeof(bool?), typeof(Optional<bool?>), "BoolNullableOptional", "boolean", null)]
+    
+    // [InlineData(typeof(byte), "integer", "int32")]
+    [InlineData(typeof(byte), typeof(Optional<byte>), "IntOptional", "integer", "int32")]
+    [InlineData(typeof(byte?), typeof(Optional<byte?>), "IntNullableOptional", "integer", "int32")]
+
+    // [InlineData(typeof(sbyte), "integer", "int32")]
+    [InlineData(typeof(sbyte), typeof(Optional<sbyte>), "IntOptional", "integer", "int32")]
+    [InlineData(typeof(sbyte?), typeof(Optional<sbyte?>), "IntNullableOptional", "integer", "int32")]
+    
+    // [InlineData(typeof(short), "integer", "int32")]
+    [InlineData(typeof(short), typeof(Optional<short>), "IntOptional", "integer", "int32")]
+    [InlineData(typeof(short?), typeof(Optional<short?>), "IntNullableOptional", "integer", "int32")]
+    
+    // [InlineData(typeof(ushort), "integer", "int32")]
+    [InlineData(typeof(ushort), typeof(Optional<ushort>), "IntOptional", "integer", "int32")]
+    [InlineData(typeof(ushort?), typeof(Optional<ushort?>), "IntNullableOptional", "integer", "int32")]
+    
+    // [InlineData(typeof(int), "integer", "int32")]
+    [InlineData(typeof(int), typeof(Optional<int>), "IntOptional", "integer", "int32")]
+    [InlineData(typeof(int?), typeof(Optional<int?>), "IntNullableOptional", "integer", "int32")]
+    
+    // [InlineData(typeof(uint), "integer", "int32")]
+    [InlineData(typeof(uint), typeof(Optional<uint>), "IntOptional", "integer", "int32")]
+    [InlineData(typeof(uint?), typeof(Optional<uint?>), "IntNullableOptional", "integer", "int32")]
+    
+    // [InlineData(typeof(long), "integer", "int64")]
+    [InlineData(typeof(long), typeof(Optional<long>), "LongOptional", "integer", "int64")]
+    [InlineData(typeof(long?), typeof(Optional<long?>), "LongNullableOptional", "integer", "int64")]
+    
+    // [InlineData(typeof(ulong), "integer", "int64")]
+    [InlineData(typeof(ulong), typeof(Optional<ulong>), "IntOptional", "integer", "int64")]
+    [InlineData(typeof(ulong?), typeof(Optional<ulong?>), "IntNullableOptional", "integer", "int64")]
+    
+    // [InlineData(typeof(float), "number", "float")]
+    [InlineData(typeof(float), typeof(Optional<float>), "FloatOptional", "number", "float")]
+    [InlineData(typeof(float?), typeof(Optional<float?>), "FloatNullableOptional", "number", "float")]
+    
+    // [InlineData(typeof(double), "number", "double")]
+    [InlineData(typeof(double), typeof(Optional<double>), "DoubleOptional", "number", "double")]
+    [InlineData(typeof(double?), typeof(Optional<double?>), "DoubleNullableOptional", "number", "double")]
+    
+    // [InlineData(typeof(decimal), "number", "double")]
+    [InlineData(typeof(decimal), typeof(Optional<decimal>), "DecimalOptional", "number", "double")]
+    [InlineData(typeof(decimal?), typeof(Optional<decimal?>), "DecimalNullableOptional", "number", "double")]
+    
+    // [InlineData(typeof(string), "string", null)]
+    [InlineData(typeof(string), typeof(Optional<string>), "StringOptional", "string", null)]
+    // [InlineData(typeof(string?), typeof(Optional<string?>), "StringOptional", "string", null)]
+    
+    // [InlineData(typeof(char), "string", null)]
+    [InlineData(typeof(char), typeof(Optional<char>), "StringOptional", "string", null)]
+    [InlineData(typeof(char?), typeof(Optional<char?>), "StringOptional", "string", null)]
+    
+    // [InlineData(typeof(byte[]), "string", "byte")]
+    [InlineData(typeof(byte[]), typeof(Optional<byte[]>), "StringOptional", "string", "byte")]
+    // [InlineData(typeof(byte[]?), typeof(Optional<byte[]?>), "StringOptional", "string", "byte")]
+    
+    // [InlineData(typeof(DateTime), "string", "date-time")]
     [InlineData(typeof(DateTime), typeof(Optional<DateTime>), "DateTimeOptional", "string", "date-time")]
     [InlineData(typeof(DateTime?), typeof(Optional<DateTime?>), "DateTimeNullableOptional", "string", "date-time")]
+    
+    // [InlineData(typeof(DateTimeOffset), "string", "date-time")]
+    [InlineData(typeof(DateTimeOffset), typeof(Optional<DateTimeOffset>), "DateTimeOffsetOptional", "string", "date-time")]
+    [InlineData(typeof(DateTimeOffset?), typeof(Optional<DateTimeOffset?>), "DateTimeOffsetNullableOptional", "string", "date-time")]
+    
+    // [InlineData(typeof(Guid), "string", "uuid")]
+    [InlineData(typeof(Guid), typeof(Optional<Guid>), "GuidOptional", "string", "uuid")]
+    [InlineData(typeof(Guid?), typeof(Optional<Guid?>), "GuidNullableOptional", "string", "uuid")]
+    
+    // [InlineData(typeof(Uri), "string", "uri")]
+    [InlineData(typeof(Uri), typeof(Optional<Uri>), "UriOptional", "string", "uri")]
+    // [InlineData(typeof(Uri?), typeof(Optional<Uri?>), "UriNullableOptional", "string", "uri")]
+    
+    // [InlineData(typeof(DateOnly), "string", "date")]
+    [InlineData(typeof(DateOnly), typeof(Optional<DateOnly>), "DateOnlyOptional", "string", "date")]
+    [InlineData(typeof(DateOnly?), typeof(Optional<DateOnly?>), "DateOnlyNullableOptional", "string", "date")]
+    
+    // [InlineData(typeof(TimeOnly), "string", "time")]
+    [InlineData(typeof(TimeOnly), typeof(Optional<TimeOnly>), "TimeOnlyOptional", "string", "time")]
+    [InlineData(typeof(TimeOnly?), typeof(Optional<TimeOnly?>), "TimeOnlyNullableOptional", "string", "time")]
+
     // [InlineData(typeof(int[]), typeof(Optional<int[]>), "Int32ArrayOptional", "array", null)]
     public async void SwaggerEndpoint_ShouldOnlyHaveGenericTypes_WhenOptionalTypeIsInRequestBody(Type type, Type optionalType, string shouldNotContainKey, string typeShouldBe, string formatShouldBe)
     {

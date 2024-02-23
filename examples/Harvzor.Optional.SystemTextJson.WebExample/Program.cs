@@ -58,9 +58,9 @@ public class IndexController : Controller
     }
     
     [HttpPost]
-    public IActionResult Post([FromBody] Foo foo)
+    public Optional<Foo> Post(Optional<Foo> foo)
     {
-        return Ok(new Optional<Foo>());
+        return foo;
     }
 }
 
@@ -77,8 +77,8 @@ public class Bar
     
     // todo: I feel like `null` shouldn't be allowed?
     public Optional<string> OptionalString { get; set; }
-    
-    public string String { get; set; }
+
+    public string String { get; set; } = "";
     
     public Optional<int?> OptionalNullableInt { get; set; }
     
@@ -108,11 +108,11 @@ public class Bar
     
     public Optional<int[]> OptionalIntArray { get; set; }
     
-    public int[] IntArray { get; set; } = { };
+    public int[] IntArray { get; set; } = Array.Empty<int>();
     
     public Optional<int[][]> OptionalIntArrayArray { get; set; }
-    
-    public int[][] IntArrayArray { get; set; }
+
+    public int[][] IntArrayArray { get; set; } = Array.Empty<int[]>();
 }
 
 // todo: test https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/v6.5.0/test/Swashbuckle.AspNetCore.IntegrationTests/DocumentProviderTests.cs

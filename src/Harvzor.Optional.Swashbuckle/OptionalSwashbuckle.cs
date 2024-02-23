@@ -169,13 +169,13 @@ public static class OptionalSwashbuckle
         
         Type argumentType = typeUsingOptional.GetGenericArguments().First();
         
-        GetTypeAndFormat(argumentType, out string argumentOpenApiType, out string? argumentFormat);
+        GetTypeAndFormat(argumentType, out DataType argumentOpenApiType, out string? argumentFormat);
         
-        if (argumentOpenApiType == "object")
+        if (argumentOpenApiType == DataType.Object)
         {
             options.RemapOptionalObject(typeUsingOptional);
         }
-        else if (argumentOpenApiType == "array")
+        else if (argumentOpenApiType == DataType.Array)
         {
             options.MapType(typeUsingOptional, () => GetSchemaOfArray(argumentType));
         }
@@ -184,7 +184,7 @@ public static class OptionalSwashbuckle
         {
             options.MapType(typeUsingOptional, () => new OpenApiSchema
             {
-                Type = argumentOpenApiType,
+                Type = argumentOpenApiType.ToString().ToLower(),
                 Format = argumentFormat,
                 // Nullable only seems to work when it's a single property, not when it's a property in an object?
                 // todo: create example project showing Nullable doesn't seem to work
@@ -219,10 +219,10 @@ public static class OptionalSwashbuckle
             throw new ArgumentException("Expected argument to be of type IEnumerable.", nameof(argumentType));
         }
         
-        GetTypeAndFormat(arrayType, out string arrayStringType, out string? arrayFormat);
+        GetTypeAndFormat(arrayType, out DataType arrayDataType, out string? arrayFormat);
 
         // If it's a multidimensional array...
-        if (arrayStringType == "array")
+        if (arrayDataType == DataType.Array)
         {
             return new OpenApiSchema
             {
@@ -234,72 +234,139 @@ public static class OptionalSwashbuckle
         return new OpenApiSchema
         {
             Type = "array",
-            Items = new OpenApiSchema()
+            Items = new OpenApiSchema
             {
-                Type = arrayStringType,
+                Type = arrayDataType.ToString().ToLower(),
                 Format = arrayFormat,
                 Nullable = arrayType.IsReferenceOrNullableType()
             }
         };
     }
 
-    // todo: may want to ensure entire list from here is used https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/8f363f7359cb1cb8fa5de5195ec6d97aefaa16b3/test/Swashbuckle.AspNetCore.SwaggerGen.Test/SchemaGenerator/JsonSerializerSchemaGeneratorTests.cs#L35
-    private static void GetTypeAndFormat(Type argumentType, out string argumentOpenApiType, out string? argumentFormat)
+    /// <remarks>
+    /// Should support same list as https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/8f363f7359cb1cb8fa5de5195ec6d97aefaa16b3/src/Swashbuckle.AspNetCore.SwaggerGen/SchemaGenerator/JsonSerializerDataContractResolver.cs#L224.
+    /// </remarks>
+    private static void GetTypeAndFormat(Type argumentType, out DataType argumentOpenApiType, out string? argumentFormat)
     {
         argumentFormat = null;
-
-        if (argumentType == typeof(int) || argumentType == typeof(int?))
+            
+        if (argumentType == typeof(bool) || argumentType == typeof(bool?))
         {
-            argumentOpenApiType = "integer";
+            argumentOpenApiType = DataType.Boolean;
+        }
+        else if (argumentType == typeof(byte) || argumentType == typeof(byte?))
+        {
+            argumentOpenApiType = DataType.Integer;
+            argumentFormat = "int32";
+        }
+        else if (argumentType == typeof(sbyte) || argumentType == typeof(sbyte?))
+        {
+            argumentOpenApiType = DataType.Integer;
+            argumentFormat = "int32";
+        }
+        else if (argumentType == typeof(short) || argumentType == typeof(short?))
+        {
+            argumentOpenApiType = DataType.Integer;
+            argumentFormat = "int32";
+        }
+        else if (argumentType == typeof(ushort) || argumentType == typeof(ushort?))
+        {
+            argumentOpenApiType = DataType.Integer;
+            argumentFormat = "int32";
+        }
+        else if (argumentType == typeof(int) || argumentType == typeof(int?))
+        {
+            argumentOpenApiType = DataType.Integer;
+            argumentFormat = "int32";
+        }
+        else if (argumentType == typeof(uint) || argumentType == typeof(uint?))
+        {
+            argumentOpenApiType = DataType.Integer;
             argumentFormat = "int32";
         }
         else if (argumentType == typeof(long) || argumentType == typeof(long?))
         {
-            argumentOpenApiType = "integer";
+            argumentOpenApiType = DataType.Integer;
+            argumentFormat = "int64";
+        }
+        else if (argumentType == typeof(ulong) || argumentType == typeof(ulong?))
+        {
+            argumentOpenApiType = DataType.Integer;
             argumentFormat = "int64";
         }
         else if (argumentType == typeof(float) || argumentType == typeof(float?))
         {
-            argumentOpenApiType = "number";
+            argumentOpenApiType = DataType.Number;
             argumentFormat = "float";
         }
         else if (argumentType == typeof(double) || argumentType == typeof(double?))
         {
-            argumentOpenApiType = "number";
+            argumentOpenApiType = DataType.Number;
+            argumentFormat = "double";
+        }
+        else if (argumentType == typeof(decimal) || argumentType == typeof(decimal?))
+        {
+            argumentOpenApiType = DataType.Number;
             argumentFormat = "double";
         }
         else if (argumentType == typeof(string) /* || argumentType == typeof(string?) */)
         {
-            argumentOpenApiType = "string";
+            argumentOpenApiType = DataType.String;
         }
-        else if (argumentType == typeof(bool) || argumentType == typeof(bool?))
+        else if (argumentType == typeof(char) || argumentType == typeof(char?))
         {
-            argumentOpenApiType = "boolean";
+            argumentOpenApiType = DataType.String;
+        }
+        else if (argumentType == typeof(byte[]) /* || argumentType == typeof(byte[]?) */)
+        {
+            argumentOpenApiType = DataType.String;
+            argumentFormat = "byte";
         }
         else if (argumentType == typeof(DateTime) || argumentType == typeof(DateTime?))
         {
-            argumentOpenApiType = "string";
+            argumentOpenApiType = DataType.String;
             argumentFormat = "date-time";
         }
+        else if (argumentType == typeof(DateTimeOffset) || argumentType == typeof(DateTimeOffset?))
+        {
+            argumentOpenApiType = DataType.String;
+            argumentFormat = "date-time";
+        }
+        else if (argumentType == typeof(Guid) || argumentType == typeof(Guid?))
+        {
+            argumentOpenApiType = DataType.String;
+            argumentFormat = "uuid";
+        }
+        else if (argumentType == typeof(Uri) /* || argumentType == typeof(Uri?) */)
+        {
+            argumentOpenApiType = DataType.String;
+            argumentFormat = "uri";
+        }
+#if NET6_0_OR_GREATER
+        else if (argumentType == typeof(DateOnly) || argumentType == typeof(DateOnly?))
+        {
+            argumentOpenApiType = DataType.String;
+            argumentFormat = "date";
+        }
+        else if (argumentType == typeof(TimeOnly) || argumentType == typeof(TimeOnly?))
+        {
+            argumentOpenApiType = DataType.String;
+            argumentFormat = "time";
+        }
+#endif
         // TimeSpan is treated as the underlying type unless overridden:
         // else if (argumentType == typeof(TimeSpan) || argumentType == typeof(TimeSpan?))
         // {
-        //     argumentOpenApiType = "string";
-        // }
-        // Not supported in netstandard:
-        // else if (argumentType == typeof(DateOnly) || argumentType == typeof(DateOnly?))
-        // {
-        //     stringType = "string";
-        //     format = "date";
+        //     argumentOpenApiType = DataType.String";
         // }
         // Statement will pass if either object[] or IEnumerable<object>:
         else if (typeof(IEnumerable).IsAssignableFrom(argumentType))
         {
-            argumentOpenApiType = "array";
+            argumentOpenApiType = DataType.Array;
         }
         else
         {
-            argumentOpenApiType = "object";
+            argumentOpenApiType = DataType.Object;
         }
     }
 
