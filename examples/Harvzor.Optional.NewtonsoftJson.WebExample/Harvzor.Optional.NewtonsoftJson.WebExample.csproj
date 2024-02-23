@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Harvzor.Optional.NewtonsoftJson\Harvzor.Optional.NewtonsoftJson.csproj" />
+      <ProjectReference Include="..\..\src\Harvzor.Optional.Swashbuckle\Harvzor.Optional.Swashbuckle.csproj" />
     </ItemGroup>
 
     <ItemGroup>

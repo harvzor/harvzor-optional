@@ -1,18 +1,26 @@
+using System.Reflection;
 using Harvzor.Optional;
 using Harvzor.Optional.NewtonsoftJson;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+using Harvzor.Optional.Swashbuckle;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddEndpointsApiExplorer()
     .AddSwaggerGen(options =>
     {
-        options.MapType<Optional<string>>(() => new OpenApiSchema
-        {
-            Type = "string"
-        });
+        // Map types manually without Harvzor.Optional.Swashbuckle:
+        // options.MapType<Optional<string?>>(() => new OpenApiSchema
+        // {
+        //     Type = "string"
+        // });
+        
+        // Auto fixes mappings:
+        options.FixOptionalMappings(Assembly.GetExecutingAssembly());
+        
+        // Alternatively, specify specific types that should be fixed:
+        // options
+        //     .FixOptionalMappingForType<Optional<string>>();
     })
     .AddSwaggerGenNewtonsoftSupport();
 
@@ -50,16 +58,19 @@ public class IndexController : Controller
     }
     
     [HttpPost]
-    public string Post(Foo foo)
+    public Foo Post(Foo foo)
     {
-        if (foo.OptionalString.IsDefined)
-            return $"You're value is \"{foo.OptionalString.Value ?? "null"}\".";
-        
-        return "You sent nothing.";
+        Console.WriteLine(
+            foo.OptionalString.IsDefined
+                ? $"You sent: {(foo.OptionalString.Value == null ? "null" : $"\"{foo.OptionalString.Value}\"")}"
+                : "You sent nothing!"
+        );
+
+        return foo;
     }
 }
 
-public record Foo
+public class Foo
 {
     public Optional<string?> OptionalString { get; set; }
 }

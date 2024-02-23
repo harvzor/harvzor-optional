@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <PackageId>Harvzor.Optional.Swashbuckle</PackageId>
+        <Authors>@harvzor</Authors>
+        <PackageProjectUrl>https://github.com/harvzor/harvzor-optional</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/harvzor/harvzor-optional</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <LangVersion>11</LangVersion>
+        <Nullable>enable</Nullable>
+        <TargetFrameworks>net5.0;net6.0;net7.0;netstandard2.0</TargetFrameworks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Harvzor.Optional\Harvzor.Optional.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\..\README.md">
+        <Pack>true</Pack>
+        <PackagePath>\</PackagePath>
+        <Link>README.md</Link>
+      </None>
+    </ItemGroup>
+
+</Project>
