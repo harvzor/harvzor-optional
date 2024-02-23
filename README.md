@@ -206,25 +206,16 @@ options
 ##### Known caveats
 
 - `FixOptionalMappings(params Assembly[] assemblies)` does not work with minimal APIs as it searches for `Optional<T>` references on parameters and properties of any classes that implement controller methods, and then maps those `Optional<T>` types to their generic type `T`
-
-###### `Optional<T>` doesn't work with query parameters
-
-You can't have the following:
-
-```csharp
-[Route("/")]
-[ApiController]
-public class IndexController : ControllerBase
-{
-    [HttpPost]
-    public string Post([FromQuery] Optional<string> foo)
+- `Optional<T>` doesn't work with query parameters
+  - You can't have the following:
+    ```csharp
+    [HttpGet]
+    public string Get([FromQuery] Optional<string> foo)
     {
         return foo;
     }
-}
-```
-
-This is because of the following issue: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2226
+    ```
+  - This is because of the following issue: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2226
 
 ##### Improvements
 
