@@ -374,7 +374,71 @@ private class GenerateSchemaFor<T> : IDocumentFilter where T : class
 
 ## Use case: JSON Merge PATCH
 
-... need docs ...
+APIs that want to use [JSON Merge PATCH](https://datatracker.ietf.org/doc/html/rfc7386) (note that this is not [JSON Patch](https://datatracker.ietf.org/doc/html/rfc6902/)) need to have a way to distinguish between PATCH data not being sent (it being undefined) and a value being explicitly set to the default value. `Harvzor.Optional` provides this functionality.
+
+Let's start with the following document stored in a database:
+
+```json
+{
+  "title": "My Title",
+  "dueDate": "2025-01-01T00:00:00Z"
+}
+```
+
+A client may want to update either the `Title` or the `DueDate`, in this example they're updating just the title:
+
+```json
+{
+  "title": "Do the thing"
+}
+```
+
+The result should be:
+
+```json
+{
+  "title": "Do the thing",
+  "dueDate": "2025-01-01T00:00:00Z"
+}
+```
+
+In our code we can represent the PATCH object with this DTO class:
+
+
+```csharp
+public class ToDoItemPatchDto
+{
+    public Optional<string> Title { get; set; }
+    
+    public Optional<DateTimeOffset?> DueDate { get; set; }
+}
+```
+
+In our controller method, we can then update only the properties which were explicitly set and not make changes to the rest:
+
+```csharp
+[HttpPatch("{id:int}")]
+[Consumes("application/merge-patch+json")]
+public IActionResult PatchToDoItem([FromRoute] int id, [FromBody] ToDoItemPatchDto dto)
+{
+    var toDoItem = _toDoItemRepository.Find(id);
+    
+    if (toDoItem == null)
+        return NotFound();
+
+    if (dto.Title.IsDefined)
+        toDoItem.Title = patch.Title.Value;
+    
+    if (dto.DueDate.IsDefined)
+        toDoItem.DueDate = patch.DueDate.Value;
+
+    toDoItem = _toDoItemRepository.Update(customer);
+    
+    return Ok(toDoItem.MapToDto());
+}
+```
+
+There are of course many other packages which provide similar functionality, but I think `Harvzor.Optional` provides the cleanest and most versatile syntax. You can look at other solutions here: https://github.com/harvzor/undefined-and-null-in-dotnet/
 
 ## Releasing
 
