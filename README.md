@@ -78,6 +78,7 @@ This example uses `System.Text.Json`:
 
 ```csharp
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using Harvzor.Optional;
 
 JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions();
