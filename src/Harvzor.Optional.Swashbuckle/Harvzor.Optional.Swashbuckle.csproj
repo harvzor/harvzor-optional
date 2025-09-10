@@ -23,11 +23,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="..\..\README.md">
-        <Pack>true</Pack>
-        <PackagePath>\</PackagePath>
-        <Link>README.md</Link>
-      </None>
+        <None Include="../../README.md" Pack="true" PackagePath="/" />
+        <None Include="../../.github/docs/broken-swagger-docs.png" Pack="true" PackagePath="/.github/docs/broken-swagger-docs.png" />
+        <None Include="../../.github/docs/fixed-swagger-docs.png" Pack="true" PackagePath="/.github/docs/fixed-swagger-docs.png" />
     </ItemGroup>
 
 </Project>

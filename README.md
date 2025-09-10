@@ -213,7 +213,7 @@ public class Foo
 
 This ends up being generated like:
 
-![broken-swagger-docs.png](https://raw.githubusercontent.com/harvzor/harvzor-optional/master/.github/docs/broken-swagger-docs.png)
+![broken-swagger-docs.png](/.github/docs/broken-swagger-docs.png)
 
 Instead we want SwaggerGen to treat `Optional<T>` as the generic type `T`. To handle doing this, first install:
 
@@ -236,7 +236,7 @@ services
 
 This results in the correct OpenAPI spec:
 
-![fixed-swagger-docs.png](https://raw.githubusercontent.com/harvzor/harvzor-optional/master/.github/docs/fixed-swagger-docs.png)
+![fixed-swagger-docs.png](/.github/docs/fixed-swagger-docs.png)
 
 This will:
 
