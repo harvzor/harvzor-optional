@@ -443,7 +443,7 @@ There are of course many other packages which provide similar functionality, but
 
 ## Releasing
 
-### GitLab CI
+### GitHub CI
 
 1. Create a new release with a semver release name
 
