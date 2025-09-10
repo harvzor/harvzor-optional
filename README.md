@@ -454,8 +454,8 @@ In case the CI doesn't work:
 1. Get an API key from https://www.nuget.org/account/apikeys
 2. Run with Docker:
     ```
-    docker-compose build --build-arg version="{version}" push-nuget
-    docker-compose run --rm push-nuget --api-key {key}
+    docker compose build --build-arg version="{version}" push-nuget
+    docker compose run --rm push-nuget --api-key {key}
     ```
 
 ## Further reading
