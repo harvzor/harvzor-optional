@@ -72,9 +72,15 @@ public static class OptionalSwashbuckle
     {
         Type openGenericOptionalType = typeof(Optional<>);
         
+        HashSet<Type> visitedTypes = new();
+        
         // Recursively find all the Optional<T> properties on the given type.
         IEnumerable<Type> WalkPropertiesAndFindOptionalProperties(Type type)
         {
+            // Prevent recursion loop.
+            if (!visitedTypes.Add(type))
+                yield break;
+
             Type nonOptionalType = type.IsGenericType && type.GetGenericTypeDefinition() == openGenericOptionalType
                 ? type.GetGenericArguments().First()
                 : type;
@@ -82,8 +88,6 @@ public static class OptionalSwashbuckle
             Type[] propertyTypes = nonOptionalType
                 .GetProperties()
                 .Select(property => property.PropertyType)
-                // Prevent recursion loop.
-                .Where(propertyType => propertyType != type)
                 .ToArray();
 
             foreach (Type propertyType in propertyTypes)

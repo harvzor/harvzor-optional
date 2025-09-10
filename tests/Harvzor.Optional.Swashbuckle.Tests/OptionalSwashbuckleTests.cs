@@ -147,7 +147,7 @@ public class OptionalSwashbuckleTests
                 optionalType
             )
         );
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
                 type,
                 type
@@ -156,11 +156,11 @@ public class OptionalSwashbuckleTests
 
         // Assert
 
-        swaggerResponse.EnsureSuccessStatusCode();
+        expectedSwaggerResponse.EnsureSuccessStatusCode();
 
-        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
 
-        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(swaggerResponse);
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(expectedSwaggerResponse);
 
         openApiDocument.Components.Schemas.ShouldNotContainKey(shouldNotContainKey);
 
@@ -216,7 +216,7 @@ public class OptionalSwashbuckleTests
                 optionalType
             )
         );
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
                 type,
                 type
@@ -225,11 +225,11 @@ public class OptionalSwashbuckleTests
 
         // Assert
 
-        swaggerResponse.EnsureSuccessStatusCode();
+        expectedSwaggerResponse.EnsureSuccessStatusCode();
 
-        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
 
-        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(swaggerResponse);
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(expectedSwaggerResponse);
 
         openApiDocument.Components.Schemas.ShouldNotContainKey("StringNullableOptional");
 
@@ -290,7 +290,7 @@ public class OptionalSwashbuckleTests
                 typeof(Optional<int[][]>)
             )
         );
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
                 typeof(int[][]),
                 typeof(int[][])
@@ -299,11 +299,11 @@ public class OptionalSwashbuckleTests
 
         // Assert
 
-        swaggerResponse.EnsureSuccessStatusCode();
+        expectedSwaggerResponse.EnsureSuccessStatusCode();
 
-        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
 
-        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(swaggerResponse);
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(expectedSwaggerResponse);
 
         openApiDocument.Components.Schemas.ShouldNotContainKey("StringNullableOptional");
 
@@ -373,7 +373,7 @@ public class OptionalSwashbuckleTests
                 typeof(Optional<string>)
             )
         );
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromQueryAttribute>(
                 typeof(string),
                 typeof(string)
@@ -382,11 +382,11 @@ public class OptionalSwashbuckleTests
 
         // Assert
 
-        swaggerResponse.EnsureSuccessStatusCode();
+        expectedSwaggerResponse.EnsureSuccessStatusCode();
 
-        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
 
-        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(swaggerResponse);
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(expectedSwaggerResponse);
 
         openApiDocument.Components.Schemas.ShouldNotContainKey("StringOptional");
 
@@ -411,7 +411,7 @@ public class OptionalSwashbuckleTests
                 typeof(string)
             )
         );
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
                 typeof(string),
                 typeof(string)
@@ -420,7 +420,7 @@ public class OptionalSwashbuckleTests
 
         // Assert
 
-        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
 
         OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
 
@@ -480,7 +480,7 @@ public class OptionalSwashbuckleTests
                 new []{ (typeof(Optional<string>), 200), (typeof(Optional<int>), 201) }
             )
         );
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
                 typeof(IActionResult),
                 typeof(string),
@@ -490,7 +490,7 @@ public class OptionalSwashbuckleTests
 
         // Assert
 
-        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
 
         OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
 
@@ -559,7 +559,7 @@ public class OptionalSwashbuckleTests
                 typeof(Optional<Foo>)
             )
         );
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
                 typeof(Foo), 
                 typeof(Foo)
@@ -568,7 +568,7 @@ public class OptionalSwashbuckleTests
 
         // Assert
 
-        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
 
         OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
 
@@ -615,8 +615,9 @@ public class OptionalSwashbuckleTests
             .ShouldBe("string");
     }
 
-    // Wrap so the version which uses Optional<T> can have the same name as the one that doesn't.
-    private class WrapperOptional
+    // WrapperOptional wraps the class inside so there can be two classes called the same, so an expected swagger response
+    // can be generated with the same class names.
+    private partial class WrapperOptional
     {
         public class Baz
         {
@@ -647,7 +648,7 @@ public class OptionalSwashbuckleTests
                 typeof(WrapperOptional.Baz)
             )
         );
-        HttpResponseMessage swaggerResponse = await GetSwaggerResponseForController(
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
             CreateController<FromBodyAttribute>(
                 typeof(Baz), 
                 typeof(Baz)
@@ -656,7 +657,7 @@ public class OptionalSwashbuckleTests
 
         // Assert
 
-        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, swaggerResponse);
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
 
         OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
         
@@ -715,6 +716,122 @@ public class OptionalSwashbuckleTests
             .Value
             .Type
             .ShouldBe("string");
+    }
+
+
+    // WrapperOptional wraps the class inside so there can be two classes called the same, so an expected swagger response
+    // can be generated with the same class names.
+    private partial class WrapperOptional
+    {
+        public class Qux
+        {
+            public Optional<Quux> Quux { get; set; }
+        }
+
+        public class Quux
+        {
+            public Optional<Qux> Qux { get; set; }
+        }
+    }
+    
+    public class Qux
+    {
+        public Optional<Quux> Quux { get; set; }
+    }
+
+    public class Quux
+    {
+        public Optional<Qux> Qux { get; set; }
+    }
+
+    /// <summary>https://github.com/harvzor/harvzor-optional/issues/11#issuecomment-3270140217</summary>
+    /// <example>
+    /// <code>
+    /// <![CDATA[
+    /// public Qux Post([FromBody] Qux qux);
+    /// ]]>
+    /// </code>
+    /// </example>
+    [Fact]
+    public async void SwaggerEndpoint_ShouldCorrectlyMapObjectsThatContainCyclicalReferencesToOptionalObjects_WhenObjectInRequest()
+    {
+        // Act
+
+        HttpResponseMessage optionalSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(WrapperOptional.Qux),
+                typeof(WrapperOptional.Qux)
+            )
+        );
+        HttpResponseMessage expectedSwaggerResponse = await GetSwaggerResponseForController(
+            CreateController<FromBodyAttribute>(
+                typeof(Qux), 
+                typeof(Qux)
+            )
+        );
+
+        // Assert
+
+        await EnsureSwaggerResponsesAreIdentical(optionalSwaggerResponse, expectedSwaggerResponse);
+
+        OpenApiDocument openApiDocument = await GetOpenApiDocumentFromResponse(optionalSwaggerResponse);
+        
+        OpenApiOperation? postOperation = openApiDocument
+            .Paths
+            .First()
+            .Value
+            .Operations
+            .First(x => x.Key == OperationType.Post)
+            .Value;
+        
+        OpenApiSchema requestSchema = postOperation.RequestBody
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+            
+        requestSchema.Type.ShouldBe("object");
+        requestSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(WrapperOptional.Qux)}");
+        
+        OpenApiSchema responseSchema = postOperation
+            .Responses
+            .First()
+            .Value
+            .Content
+            .First(x => x.Key == MediaTypeNames.Application.Json)
+            .Value
+            .Schema;
+        
+        responseSchema.Type.ShouldBe("object");
+        responseSchema.Reference.ReferenceV3.ShouldBe($"#/components/schemas/{nameof(WrapperOptional.Qux)}");
+        
+        OpenApiSchema quxSchema = openApiDocument
+            .Components
+            .Schemas
+            .First(x => x.Key == $"{nameof(WrapperOptional.Qux)}")
+            .Value;
+
+        quxSchema
+            .Properties
+            .First(x => x.Key == nameof(WrapperOptional.Qux.Quux).ToLower())
+            .Value
+            .Reference
+            .ReferenceV3
+            .ShouldBe($"#/components/schemas/{nameof(Quux)}");
+
+        OpenApiSchema quuxSchema = openApiDocument
+            .Components
+            .Schemas
+            .First(x => x.Key == $"{nameof(Qux.Quux)}")
+            .Value;
+        
+        quuxSchema
+            .Properties
+            .First(x => x.Key == nameof(Qux).ToLower())
+            .Value
+            .Reference
+            .ReferenceV3
+            .ShouldBe($"#/components/schemas/{nameof(Qux)}");
     }
 
     // Only a struct can really be Nullable.
@@ -793,10 +910,10 @@ public class OptionalSwashbuckleTests
     }
 
     private async Task EnsureSwaggerResponsesAreIdentical(HttpResponseMessage optionalSwaggerResponse,
-        HttpResponseMessage swaggerResponse)
+        HttpResponseMessage expectedSwaggerResponse)
     {
         string optionalSwaggerResponseString = await optionalSwaggerResponse.Content.ReadAsStringAsync();
-        string swaggerResponseString = await swaggerResponse.Content.ReadAsStringAsync();
+        string swaggerResponseString = await expectedSwaggerResponse.Content.ReadAsStringAsync();
 
         optionalSwaggerResponseString.ShouldBe(swaggerResponseString);
     }
