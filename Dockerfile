@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim as build
+FROM mcr.microsoft.com/dotnet/nightly/sdk:9.0 as build
 
 ARG version="0.0.0"
 WORKDIR /sln
