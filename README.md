@@ -373,6 +373,28 @@ private class GenerateSchemaFor<T> : IDocumentFilter where T : class
 }
 ```
 
+### Microsoft.AspNetCore.OpenApi support
+
+If you're using `Microsoft.AspNetCore.OpenApi` (the built-in OpenAPI support in ASP.NET Core), you can add support for `Optional<T>` like this:
+
+```csharp
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi(options => {
+    // https://learn.microsoft.com/en-us/aspnet/core/fundamentals/openapi/customize-openapi?view=aspnetcore-9.0
+    options.AddSchemaTransformer((schema, context, _) =>
+    {
+        if (context.JsonTypeInfo.Type == typeof(Optional<string?>))
+        {
+            schema.Type = "string";
+            schema.Properties.Clear();
+            schema.Annotations.Clear();
+        }
+        return Task.CompletedTask;
+    });
+});
+```
+
 ## Use case: JSON Merge PATCH
 
 APIs that want to use [JSON Merge PATCH](https://datatracker.ietf.org/doc/html/rfc7386) (note that this is not [JSON Patch](https://datatracker.ietf.org/doc/html/rfc6902/)) need to have a way to distinguish between PATCH data not being sent (it being undefined) and a value being explicitly set to the default value. `Harvzor.Optional` provides this functionality.

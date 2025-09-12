@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.Swashbuckl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.Swashbuckle.Tests", "tests\Harvzor.Optional.Swashbuckle.Tests\Harvzor.Optional.Swashbuckle.Tests.csproj", "{171F8BB6-1167-4553-9E4B-BEC33E75DC4F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson.OpenApi.WebExample", "examples\Harvzor.Optional.SystemTextJson.OpenApi.WebExample\Harvzor.Optional.SystemTextJson.OpenApi.WebExample.csproj", "{90DBBDAA-726B-497F-99D2-569EE2661746}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +98,10 @@ Global
 		{171F8BB6-1167-4553-9E4B-BEC33E75DC4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{171F8BB6-1167-4553-9E4B-BEC33E75DC4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{171F8BB6-1167-4553-9E4B-BEC33E75DC4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90DBBDAA-726B-497F-99D2-569EE2661746}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90DBBDAA-726B-497F-99D2-569EE2661746}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90DBBDAA-726B-497F-99D2-569EE2661746}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90DBBDAA-726B-497F-99D2-569EE2661746}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9ED9BB37-3250-4DF0-8224-FE86BAA2859A} = {0DC0E672-7784-4D81-8A18-C415472AC595}
@@ -112,5 +118,6 @@ Global
 		{4257F779-067E-4EF8-9B56-DACCBA996357} = {A8A8C7B4-D30A-49F8-8F0F-D2CDB88EDE53}
 		{3BFA9880-A29C-444D-9F94-633FE0901CFE} = {0DC0E672-7784-4D81-8A18-C415472AC595}
 		{171F8BB6-1167-4553-9E4B-BEC33E75DC4F} = {A8A8C7B4-D30A-49F8-8F0F-D2CDB88EDE53}
+		{90DBBDAA-726B-497F-99D2-569EE2661746} = {014F5435-D1FE-4CDE-B116-97F5C0E840FD}
 	EndGlobalSection
 EndGlobal
