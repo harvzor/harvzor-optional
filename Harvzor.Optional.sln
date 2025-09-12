@@ -9,6 +9,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0DC0E672-7784-4D81-8A18-C415472AC595}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{014F5435-D1FE-4CDE-B116-97F5C0E840FD}"
+	ProjectSection(SolutionItems) = preProject
+		examples\Problem.cs = examples\Problem.cs
+		examples\BasicExample.cs = examples\BasicExample.cs
+		examples\JsonExample.cs = examples\JsonExample.cs
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harvzor.Optional.SystemTextJson.WebExample", "examples\Harvzor.Optional.SystemTextJson.WebExample\Harvzor.Optional.SystemTextJson.WebExample.csproj", "{3D32BE33-BB08-4383-9E63-C00709B311F2}"
 EndProject
